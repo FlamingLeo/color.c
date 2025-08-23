@@ -1,5 +1,5 @@
-CC = gcc
-CFLAGS = -Wall -Wextra -Wno-missing-braces -I$(INC_DIR) -Os
+CC      = gcc
+CFLAGS  = -Wall -Wextra -Wno-missing-braces -I$(INC_DIR) -Os
 LDFLAGS = -lm
 
 SRC_DIR = src
@@ -9,10 +9,16 @@ OBJ_DIR = obj
 SRCS = $(wildcard $(SRC_DIR)/*.c)
 OBJS = $(patsubst $(SRC_DIR)/%.c, $(OBJ_DIR)/%.o, $(SRCS))
 
-TARGET = color
+TARGET   = color
 TEST_SRC = tests/tests.c
 TEST_OBJ = $(OBJ_DIR)/tests.o
 TEST_BIN = $(TARGET)_test
+
+GIT_HASH      := $(shell git rev-parse --short HEAD)
+GIT_BRANCH    := $(shell git rev-parse --abbrev-ref HEAD)
+COMPILE_TIME  := $(shell date -u)
+VERSION_FLAGS := -DGIT_HASH=\"$(GIT_HASH)\" -DGIT_BRANCH="\"$(GIT_BRANCH)\"" -DCOMPILE_TIME="\"$(COMPILE_TIME)\""
+CFLAGS += $(VERSION_FLAGS)
 
 all: $(TARGET)
 

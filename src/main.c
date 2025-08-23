@@ -42,6 +42,11 @@ static inline void print_help(const char* progname) {
            "  hsv:  hsv(h,s%%,v%%)\n"
            "        hsv(h,s,v)\n"
            "        h,s%%,v%%\n");
+#if defined(GIT_HASH) && defined(GIT_BRANCH) && defined(COMPILE_TIME)
+    printf("\nhash:   " GIT_HASH
+           "\nbranch: " GIT_BRANCH
+           "\ntime:   " COMPILE_TIME "\n");
+#endif
 }
 
 // usage: <progname> [options] color
