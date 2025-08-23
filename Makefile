@@ -9,10 +9,10 @@ OBJ_DIR = obj
 SRCS = $(wildcard $(SRC_DIR)/*.c)
 OBJS = $(patsubst $(SRC_DIR)/%.c, $(OBJ_DIR)/%.o, $(SRCS))
 
-TARGET = colors
+TARGET = color
 TEST_SRC = tests/tests.c
 TEST_OBJ = $(OBJ_DIR)/tests.o
-TEST_BIN = colors_test
+TEST_BIN = $(TARGET)_test
 
 all: $(TARGET)
 
@@ -36,7 +36,10 @@ test: $(TEST_BIN)
 $(OBJ_DIR):
 	mkdir -p $(OBJ_DIR)
 
+targetname:
+	@printf '%s\n' $(TARGET)
+
 clean:
 	rm -rf $(OBJ_DIR) $(TARGET) $(TEST_BIN)
 
-.PHONY: all clean test
+.PHONY: all targetname clean test

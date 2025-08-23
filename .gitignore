@@ -1,5 +1,8 @@
+
+*
+!*.*
+!*/
 .vscode/
 obj/
 *.txt
 *.log
-colors*

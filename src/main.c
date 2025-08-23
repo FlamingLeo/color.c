@@ -17,7 +17,7 @@
 // helper print functions
 static inline void print_usage(FILE* stream, const char *progname) { fprintf(stream, "usage: %s [-h] color\nsee readme or help for a list of valid formats\n", progname); }
 static inline void print_help(const char* progname) {
-    printf(C_BOLD "colors - a color printing (and conversion) tool for true color terminals\n\n" C_RESET);
+    printf(C_BOLD "color - a color printing (and conversion) tool for true color terminals\n\n" C_RESET);
     print_usage(stdout, progname);
     printf("\noptions:\n"
            "  -h        : show this help text\n"
