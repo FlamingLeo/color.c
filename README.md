@@ -6,18 +6,19 @@
 `color.c` is a command-line tool designed for terminals with 24-bit color support which automatically parses the input color, displays it and shows a list of conversions to other common color models.
 
 ## Usage and Formats
-**Usage**: `color [-d n] [-w n] [-t] [-x] [-l [0|1]] [-h] <clr>`
+**Usage**: `color [-c <model>] [-d n] [-w n] [-p] [-x] [-l [0|1]] [-h] <clr>`
 
 Following options are supported:
 ```text
 -h        : show this help text\n"
--d [0..10]: choose the maximum amount of decimal places to print             (default: 2)
--l [0 | 1]: show a list of currently supported named css colors and exit     (default: 0)
+-c <model>: only show the conversion of the chosen color to the specified model, then exit
+-d [0..5] : choose the maximum amount of decimal places to print
+-l [0 | 1]: show a list of currently supported named css colors and exit
     - 0: human-readable format with sample, name and hex color
     - 1: csv output with headers name, color, no sample
--w [0..25]: choose the width of the left color square to display (h = w / 2) (default: 14)
--t        : disable coloring text output (useful for hard-to-read colors)    (default: true)
--x        : print colors in web format (css)                                 (default: false)
+-w [0..25]: choose the width of the left color square to display (h = w / 2)
+-p        : disable coloring text output (plain, for hard-to-read colors)
+-x        : print colors in web format (css)
 ```
 
 **NOTE**: Use `-w 0` to disable the color block or `-d 0` to round to the nearest integer.
@@ -54,7 +55,7 @@ Read more about the supported formats here: [RGB](https://en.wikipedia.org/wiki/
 
 The repository provides a simple shell script for Linux which builds the program and installs (copies) it to `/usr/local/bin`. You may provide an optional `name` argument to install the binary under a different name, to prevent clashing with another program (the name is pretty basic, after all).
 
-Alternatively, you can just build the executable in the root directory of the repository using `make`.Unit tests are available using `make test`.
+Alternatively, you can just build the executable in the root directory of the repository using `make`. Unit tests are available using `make test`.
 
 ## License (?)
 [Do whatever you want](https://en.wikipedia.org/wiki/WTFPL), I don't know, I'm not good at this legal stuff anyway.

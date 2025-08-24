@@ -8,6 +8,7 @@
 
 #define STR_BUFSIZE   128
 #define C_STR_BUFSIZE 20
+#define C_COL_BUFSIZE 64
 
 #define NULLSTR  "<NULL>"
 #define C_RESET  "\x1b[0m"

@@ -364,13 +364,13 @@ void list_css_colors(int l) {
     size_t n = sizeof(css_colors) / sizeof(css_colors[0]);
 
     if (!l)
-        for(size_t i = 0; i < n; ++i) {
+        for (size_t i = 0; i < n; ++i) {
             rgb_t rgb = hex_to_rgb(css_colors[i].hex);
             printf("\033[48;2;%d;%d;%dm   "C_RESET " %-21s#%06x\n", rgb.r, rgb.g, rgb.b, css_colors[i].name, css_colors[i].hex);
         }
     else {
         printf("name,color\n");
-        for(size_t i = 0; i < n; ++i) printf("%s,%06x\n", css_colors[i].name, css_colors[i].hex); 
+        for  (size_t i = 0; i < n; ++i) printf("%s,%06x\n", css_colors[i].name, css_colors[i].hex);
     }
 }
 
