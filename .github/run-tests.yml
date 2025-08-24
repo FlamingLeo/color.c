@@ -1,0 +1,21 @@
+name: Run 
+
+on:
+    push:
+        branches:
+            - "Assignment*"
+            - master
+
+jobs:
+    test:
+        runs-on: ubuntu-latest
+
+        steps:
+            - name: Checkout the repository
+              uses: actions/checkout@v4
+
+            - name: Set up testing dependencies and external libraries
+              run: sudo apt-get update && sudo apt-get install -y build-essential
+
+            - name: Run tests
+              run: make test
