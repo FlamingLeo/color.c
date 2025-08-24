@@ -14,9 +14,12 @@
 // returns 0 if the string could not be parsed and does nothing with *out
 int parse_color(const char *in, color_t *out);
 
-// print a formatted list of all named css colors
+// print a formatted list of all named colors (css or xkcd, based on choice)
 // if l is 0, the result is a prettified table consisting of "colorsample name #rrggbb" separated by whitespace
 // if l is 1, the result is a csv-like output "name,#rrggbb"
-void list_css_colors(int l);
+void list_colors(int l);
+
+// use xkcd color names instead of css (updates internal pointer and size)
+void use_xkcd();
 
 #endif

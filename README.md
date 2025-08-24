@@ -6,19 +6,22 @@
 `color.c` is a command-line tool designed for terminals with 24-bit color support which automatically parses the input color, displays it and shows a list of conversions to other common color models.
 
 ## Usage and Formats
-**Usage**: `color [-c <model>] [-d n] [-w n] [-p] [-x] [-l [0|1]] [-h] <clr>`
+**Usage**: `color [-c <model>] [-f <n>] [-w <n>] [-j] [-p] [-x] [-z] [-l [0|1]] [-h] <color>`
 
 Following options are supported:
 ```text
--h        : show this help text\n"
+-h        : show this help text and exit
 -c <model>: only show the conversion of the chosen color to the specified model, then exit
--d [0..5] : choose the maximum amount of decimal places to print
--l [0 | 1]: show a list of currently supported named css colors and exit
+-l [0 | 1]: show a list of currently supported named colors and exit (default: 0)
     - 0: human-readable format with sample, name and hex color
-    - 1: csv output with headers name, color, no sample
--w [0..25]: choose the width of the left color square to display (h = w / 2)
--p        : disable coloring text output (plain, for hard-to-read colors)
--x        : print colors in web format (css)
+    - 1: csv output with headers "name", "color", no sample
+-f <0..5> : choose the maximum amount of decimal places to print (default: 2)
+-w <0..25>: choose the width of the left color square to display (h = w / 2) (default: 14)
+-j        : print output in json format
+-p        : disable coloring text output (plain, for hard-to-read colors) (default: true)
+-x        : use xkcd color names instead of css (default: false)
+            this option must be set if you want to parse an xkcd color name
+-z        : print colors in web format (css) (default: false)
 ```
 
 **NOTE**: Use `-w 0` to disable the color block or `-d 0` to round to the nearest integer.

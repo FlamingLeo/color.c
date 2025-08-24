@@ -17,22 +17,25 @@
 #define CLAMP(_n, _l, _r)            ((_n) < (_l) ? (_l) : ((_n) > (_r) ? (_r) : (_n)))
 
 // helper print functions
-static inline void print_usage(FILE* stream, const char *progname) { fprintf(stream, "usage: %s [-c <model>] [-f <n>] [-w <n>] [-p] [-x] [-l [0|1]] [-h] <color>\nsee readme or help for a list of valid formats\n", progname); }
+static inline void print_usage(FILE* stream, const char *progname) { fprintf(stream, "usage: %s [-c <model>] [-f <n>] [-w <n>] [-j] [-p] [-x] [-z] [-l [0|1]] [-h] <color>\nsee readme or help for a list of valid formats\n", progname); }
 static inline void print_help(const char* progname) {
     printf(C_BOLD "color - a color printing (and conversion) tool for true color terminals\n\n" C_RESET);
     print_usage(stdout, progname);
     printf("\noptions:\n"
            "  -h        : show this help text and exit\n"
            "  -c <model>: only show the conversion of the chosen color to the specified model, then exit\n"
-           "  -l [0 | 1]: show a list of currently supported named css colors and exit (default: 0)\n"
+           "  -l [0 | 1]: show a list of currently supported named colors and exit (default: 0)\n"
            "     - 0: human-readable format with sample, name and hex color\n"
            "     - 1: csv output with headers \"name\", \"color\", no sample\n"
            "  -f <0..5> : choose the maximum amount of decimal places to print (default: 2)\n"
            "  -w <0..25>: choose the width of the left color square to display (h = w / 2) (default: 14)\n"
+           "  -j        : print output in json format\n"
            "  -p        : disable coloring text output (plain, for hard-to-read colors) (default: true)\n"
-           "  -x        : print colors in web format (css) (default: false)\n");
+           "  -x        : use xkcd color names instead of css (default: false)\n"
+           "              this option must be set if you want to parse an xkcd color name\n"
+           "  -z        : print colors in web format (css) (default: false)\n");
     printf("\nvalid color formats (case-insensitive):\n"
-           "  named: any valid named css color (e.g. forestgreen, mediumblue...)\n"
+           "  named: any valid named css / xkcd color (e.g. forestgreen, mediumblue...)\n"
            "  rgb:   rgb(r,g,b)\n"
            "         r,g,b\n"
            "  hex:   #rrggbb\n"
@@ -67,19 +70,22 @@ int main(int argc, char **argv) {
     int  dplaces     = 2;     // number of decimal places to round output to for numbers with decimal values (cmyk, hsl...)
     bool webfmt      = false; // display colors in css format
     bool txtclr      = true;  // color text output
+    bool json        = false; // print output in json format instead of the usual format
     char* conversion = NULL;  // only display conversion to a specific format
 
     // handle command line options
     // i should probably use strtol here but the variables being modified aren't really critical
     int arg = 1;
     while ((argc > arg) && (argv[arg][0] == '-')) {
-        if (argv[arg][1] == 'x') webfmt = true;
+        if (argv[arg][1] == 'z') webfmt = true;
         if (argv[arg][1] == 'p') txtclr = false;
+        if (argv[arg][1] == 'j') json   = true;
+        if (argv[arg][1] == 'x') use_xkcd();
         if (argv[arg][1] == 'c' && argc > arg + 1) conversion = argv[++arg];
         if (argv[arg][1] == 'w' && argc > arg + 1) { cwidth  = atoi(argv[++arg]); cwidth  = CLAMP(cwidth , 0, 25); }
         if (argv[arg][1] == 'f' && argc > arg + 1) { dplaces = atoi(argv[++arg]); dplaces = CLAMP(dplaces, 0, 5);  }
         if (argv[arg][1] == 'h') { print_help(progname); return 0; }
-        if (argv[arg][1] == 'l') { int lmode = 0; if(argc > arg + 1) lmode = atoi(argv[++arg]); if (lmode < 0 || lmode > 1) ERROR_EXIT("invalid list mode %d", lmode); else list_css_colors(lmode); return 0; }
+        if (argv[arg][1] == 'l') { int lmode = 0; if(argc > arg + 1) lmode = atoi(argv[++arg]); if (lmode < 0 || lmode > 1) ERROR_EXIT("invalid list mode %d", lmode); else list_colors(lmode); return 0; }
         arg++;
     }
     int cheight = (cwidth >> 1) + (cwidth % 2);
@@ -97,7 +103,7 @@ int main(int argc, char **argv) {
     // attempt to parse color
     color_t color = { 0 }; if(!parse_color(colorbuf, &color)) ERROR_EXIT("invalid syntax %s", colorbuf);
 
-    // copy css formatted strings into buffers
+    // copy formatted strings into buffers
     char rgb[C_COL_BUFSIZE], hex[C_COL_BUFSIZE], cmyk[C_COL_BUFSIZE], hsl[C_COL_BUFSIZE], hsv[C_COL_BUFSIZE], named[STR_BUFSIZE];
     if(webfmt) {
         snprintf(rgb,   sizeof(rgb),   "rgb(%d,%d,%d)",                     color.rgb.r, color.rgb.g, color.rgb.b); 
@@ -105,14 +111,14 @@ int main(int argc, char **argv) {
         snprintf(cmyk,  sizeof(cmyk),  "cmyk(%.*g%%,%.*g%%,%.*g%%,%.*g%%)", DPLACES(color.cmyk.c * 100.0, dplaces), color.cmyk.c * 100.0, DPLACES(color.cmyk.m * 100.0, dplaces), color.cmyk.m * 100.0, DPLACES(color.cmyk.y * 100.0, dplaces), color.cmyk.y * 100.0, DPLACES(color.cmyk.k * 100.0, dplaces), color.cmyk.k * 100.0);
         snprintf(hsl,   sizeof(hsl),   "hsl(%.*g,%.*g%%,%.*g%%)",           DPLACES(color.hsl.h, dplaces), color.hsl.h, DPLACES(color.hsl.sat * 100.0, dplaces), color.hsl.sat * 100.0, DPLACES(color.hsl.l * 100.0, dplaces), color.hsl.l * 100.0);
         snprintf(hsv,   sizeof(hsv),   "hsv(%.*g,%.*g%%,%.*g%%)",           DPLACES(color.hsv.h, dplaces), color.hsv.h, DPLACES(color.hsv.sat * 100.0, dplaces), color.hsv.sat * 100.0, DPLACES(color.hsv.v * 100.0, dplaces), color.hsv.v * 100.0);
-        snprintf(named, sizeof(named), "%s (#%06x) (dist² %.*g)",      color.named.name, color.named.hex, DPLACES(color.named.diff, dplaces), color.named.diff);
+        snprintf(named, sizeof(named), "%s (#%06x) (dist² %.*g)",           color.named.name, color.named.hex, DPLACES(color.named.diff, dplaces), color.named.diff);
     } else {
         snprintf(rgb,   sizeof(rgb),   "%d,%d,%d",                          color.rgb.r, color.rgb.g, color.rgb.b); 
         snprintf(hex,   sizeof(hex),   "%06x",                              color.hex);
         snprintf(cmyk,  sizeof(cmyk),  "%.*g%%,%.*g%%,%.*g%%,%.*g%%",       DPLACES(color.cmyk.c * 100.0, dplaces), color.cmyk.c * 100.0, DPLACES(color.cmyk.m * 100.0, dplaces), color.cmyk.m * 100.0, DPLACES(color.cmyk.y * 100.0, dplaces), color.cmyk.y * 100.0, DPLACES(color.cmyk.k * 100.0, dplaces), color.cmyk.k * 100.0);
         snprintf(hsl,   sizeof(hsl),   "%.*g,%.*g%%,%.*g%%",                DPLACES(color.hsl.h, dplaces), color.hsl.h, DPLACES(color.hsl.sat * 100.0, dplaces), color.hsl.sat * 100.0, DPLACES(color.hsl.l * 100.0, dplaces), color.hsl.l * 100.0);
         snprintf(hsv,   sizeof(hsv),   "%.*g,%.*g%%,%.*g%%",                DPLACES(color.hsv.h, dplaces), color.hsv.h, DPLACES(color.hsv.sat * 100.0, dplaces), color.hsv.sat * 100.0, DPLACES(color.hsv.v * 100.0, dplaces), color.hsv.v * 100.0);
-        snprintf(named, sizeof(named), "%s (%06x) (dist² %.*g)",       color.named.name, color.named.hex, DPLACES(color.named.diff, dplaces), color.named.diff);
+        snprintf(named, sizeof(named), "%s (%06x) (dist² %.*g)",            color.named.name, color.named.hex, DPLACES(color.named.diff, dplaces), color.named.diff);
     }
 
     // if the user wants to do conversion, only display the converted model (or error for some unsupported model)
@@ -131,16 +137,33 @@ int main(int argc, char **argv) {
     char fgbuf[C_STR_BUFSIZE]; snprintf(fgbuf, sizeof(fgbuf), "\033[38;2;%d;%d;%dm", color.rgb.r, color.rgb.g, color.rgb.b);
     
     // do the thing
-    PRINT_COLOR("RGB" , "%s", rgb);
-    PRINT_COLOR("Hex" , "%s", hex);
-    PRINT_COLOR("CMYK", "%s", cmyk);
-    PRINT_COLOR("HSL" , "%s", hsl);
-    PRINT_COLOR("HSV" , "%s", hsv);
-    PRINT_COLOR_EMPTY();
-    PRINT_COLOR("Named" , "%s", named);
-
-    // print remaining characters of left sample, if there are any left
-    for (; cheight > 0; --cheight) printf("%s%*s" C_RESET "\n", bgbuf, cwidth, " ");
+    if (json) {
+        printf("{\n"
+               "  \"rgb\": { \"r\": %d, \"g\": %d, \"b\": %d },\n"
+               "  \"hex\": \"#%06x\",\n"
+               "  \"cmyk\": { \"c\": %f, \"m\": %f, \"y\": %f, \"k\": %f },\n"
+               "  \"hsl\": { \"h\": %f, \"s\": %f, \"l\": %f },\n"
+               "  \"hsv\": { \"h\": %f, \"s\": %f, \"v\": %f },\n"
+               "  \"named\": { \"name\": \"%s\", \"hex\": \"#%06x\", \"sqrdist\": %f }\n"
+               "}\n", 
+               color.rgb.r, color.rgb.g, color.rgb.b,
+               color.hex,
+               color.cmyk.c, color.cmyk.m, color.cmyk.y, color.cmyk.k,
+               color.hsl.h, color.hsl.sat, color.hsl.l,
+               color.hsv.h, color.hsv.sat, color.hsv.v,
+               color.named.name, color.named.hex, color.named.diff);
+    } else {
+        PRINT_COLOR("RGB" , "%s", rgb);
+        PRINT_COLOR("Hex" , "%s", hex);
+        PRINT_COLOR("CMYK", "%s", cmyk);
+        PRINT_COLOR("HSL" , "%s", hsl);
+        PRINT_COLOR("HSV" , "%s", hsv);
+        PRINT_COLOR_EMPTY();
+        PRINT_COLOR("Named" , "%s", named);
+        
+        // print remaining characters of left sample, if there are any left
+        for (; cheight > 0; --cheight) printf("%s%*s" C_RESET "\n", bgbuf, cwidth, " ");
+    }
 
     return 0;
 }
