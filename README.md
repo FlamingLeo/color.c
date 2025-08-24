@@ -24,10 +24,11 @@ Following options are supported:
 -z        : print colors in web format (css) (default: false)
 ```
 
-**NOTE**: Use `-w 0` to disable the color block or `-d 0` to round to the nearest integer.
+> [!TIP]
+> Use `-w 0` to disable the color block or `-d 0` to round to the nearest integer.
 
 Following color models and input formats are supported (case-insensitive, whitespace allowed):
-- **Named CSS**: Any valid named CSS color will work.
+- **Named**: Any valid named [CSS](https://github.com/bahamas10/css-color-names/blob/master/css-color-names.json) / [XKCD](https://xkcd.com/color/rgb/) color will work.
 - **RGB** (`r`, `g`, `b` between 0 and 255 as integers or between 0.0 and 1.0 as floats): 
     - `rgb(r,g,b)`
     - `r,g,b`
@@ -51,7 +52,8 @@ Following color models and input formats are supported (case-insensitive, whites
 
 Read more about the supported formats here: [RGB](https://en.wikipedia.org/wiki/RGB_color_model), [Hex](https://en.wikipedia.org/wiki/Web_colors), [CMYK](https://en.wikipedia.org/wiki/CMYK_color_model), [HSL and HSV](https://en.wikipedia.org/wiki/HSL_and_HSV).
 
-**NOTE**: A simple triplet will be parsed as RGB. To differentiate between RGB and HSV, percentage symbols are needed for saturation and value. Because HSL and HSV have the same structure from the parser's point of view, a triplet where the last two contain percentages will be parsed as HSV.
+> [!NOTE]  
+> A simple triplet will be parsed as RGB. To differentiate between RGB and HSV, percentage symbols are needed for saturation and value. Because HSL and HSV have the same structure from the parser's point of view, a triplet where the last two contain percentages will be parsed as HSV.
 
 ## Build and  Installation
 **Usage**: `./install.sh [name]`
