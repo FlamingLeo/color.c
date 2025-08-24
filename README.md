@@ -6,12 +6,15 @@
 `color.c` is a command-line tool designed for terminals with 24-bit color support which automatically parses the input color, displays it and shows a list of conversions to other common color models.
 
 ## Usage and Formats
-**Usage**: `color [-d n] [-w n] [-t] [-x] [-h] <clr>`
+**Usage**: `color [-d n] [-w n] [-t] [-x] [-l [0|1]] [-h] <clr>`
 
 Following options are supported:
 ```text
 -h        : show this help text\n"
 -d [0..10]: choose the maximum amount of decimal places to print             (default: 2)
+-l [0 | 1]: show a list of currently supported named css colors and exit     (default: 0)
+    - 0: human-readable format with sample, name and hex color
+    - 1: csv output with headers name, color, no sample
 -w [0..25]: choose the width of the left color square to display (h = w / 2) (default: 14)
 -t        : disable coloring text output (useful for hard-to-read colors)    (default: true)
 -x        : print colors in web format (css)                                 (default: false)

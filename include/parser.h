@@ -14,4 +14,9 @@
 // returns 0 if the string could not be parsed and does nothing with *out
 int parse_color(const char *in, color_t *out);
 
+// print a formatted list of all named css colors
+// if l is 0, the result is a prettified table consisting of "colorsample name #rrggbb" separated by whitespace
+// if l is 1, the result is a csv-like output "name,#rrggbb"
+void list_css_colors(int l);
+
 #endif

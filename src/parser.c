@@ -283,8 +283,7 @@ static inline int parse_hsl(char *s, color_t *out)  {
 
 // HSV: "hsv(h,s%,v%)", "hsv(h,s,v)", "h,s%,v%"
 // bare requires (!) '%' for s and v
-static inline int parse_hsv(char *s, color_t *out)
-{
+static inline int parse_hsv(char *s, color_t *out) {
     double h, sat, v;
     int    n = 0;
     if (strncmp(s, "hsv(", 4) == 0) {
@@ -333,8 +332,7 @@ static inline int parse_hsv(char *s, color_t *out)
 static parse_fn parsers[] = {parse_named, parse_hex, parse_rgb, parse_cmyk, parse_hsl, parse_hsv};
 
 // public api
-int parse_color(const char *in, color_t *out)
-{
+int parse_color(const char *in, color_t *out) {
     if (!in || !out) return 0;
 
     // copy and normalize input
@@ -360,6 +358,20 @@ int parse_color(const char *in, color_t *out)
 
     // string could not be parsed by any parser in list
     return 0;
+}
+
+void list_css_colors(int l) {
+    size_t n = sizeof(css_colors) / sizeof(css_colors[0]);
+
+    if (!l)
+        for(size_t i = 0; i < n; ++i) {
+            rgb_t rgb = hex_to_rgb(css_colors[i].hex);
+            printf("\033[48;2;%d;%d;%dm   "C_RESET " %-21s#%06x\n", rgb.r, rgb.g, rgb.b, css_colors[i].name, css_colors[i].hex);
+        }
+    else {
+        printf("name,color\n");
+        for(size_t i = 0; i < n; ++i) printf("%s,%06x\n", css_colors[i].name, css_colors[i].hex); 
+    }
 }
 
 // TODO: alpha

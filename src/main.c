@@ -16,12 +16,15 @@
 #define CLAMP(_n, _l, _r)            ((_n) < (_l) ? (_l) : ((_n) > (_r) ? (_r) : (_n)))
 
 // helper print functions
-static inline void print_usage(FILE* stream, const char *progname) { fprintf(stream, "usage: %s [-d n] [-w n] [-t] [-x] [-h] color\nsee readme or help for a list of valid formats\n", progname); }
+static inline void print_usage(FILE* stream, const char *progname) { fprintf(stream, "usage: %s [-d n] [-w n] [-t] [-x] [-l [0|1]] [-h] color\nsee readme or help for a list of valid formats\n", progname); }
 static inline void print_help(const char* progname) {
     printf(C_BOLD "color - a color printing (and conversion) tool for true color terminals\n\n" C_RESET);
     print_usage(stdout, progname);
     printf("\noptions:\n"
-           "  -h        : show this help text\n"
+           "  -h        : show this help text and exit\n"
+           "  -l [0 | 1]: show a list of currently supported named css colors and exit     (default: 0)\n"
+           "     - 0: human-readable format with sample, name and hex color\n"
+           "     - 1: csv output with headers \"name\", \"color\", no sample\n"
            "  -d [0..10]: choose the maximum amount of decimal places to print             (default: 2)\n"
            "  -w [0..25]: choose the width of the left color square to display (h = w / 2) (default: 14)\n"
            "  -t        : disable coloring text output (useful for hard-to-read colors)    (default: true)\n"
@@ -72,6 +75,7 @@ int main(int argc, char **argv) {
         if (argv[arg][1] == 'w' && argc > arg + 1) { cwidth  = atoi(argv[++arg]); cwidth  = CLAMP(cwidth , 0, 25); }
         if (argv[arg][1] == 'd' && argc > arg + 1) { dplaces = atoi(argv[++arg]); dplaces = CLAMP(dplaces, 0, 10); }
         if (argv[arg][1] == 'h') { print_help(progname); return 0; }
+        if (argv[arg][1] == 'l') { int lmode = 0; if(argc > arg + 1) lmode = atoi(argv[++arg]); if (lmode < 0 || lmode > 1) ERROR_EXIT("invalid list mode %d", lmode); else list_css_colors(lmode); return 0; }
         arg++;
     }
     int cheight = (cwidth >> 1) + (cwidth % 2);
