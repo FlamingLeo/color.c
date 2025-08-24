@@ -10,7 +10,8 @@
 //   ESC[48;2;⟨r⟩;⟨g⟩;⟨b⟩m Select RGB background color
 
 #define ERROR_EXIT(fmt, ...)         do { fprintf(stderr, "error: " fmt "\n\n", ##__VA_ARGS__); print_usage(stderr, progname); return 1; } while(0)
-#define PRINT_COLOR(label, fmt, ...) do { printf("%s%*s" C_RESET "%s%s%-4s : ", cheight-- > 0 ? bgbuf : "", cwidth, cwidth > 0 ? " " : "", cwidth > 0 ? "   " : "", txtclr ? fgbuf : "", label); printf((fmt), __VA_ARGS__); printf(C_RESET "\n"); } while (0)
+#define PRINT_COLOR(label, fmt, ...) do { printf("%s%*s" C_RESET "%s%s%-5s : ", cheight-- > 0 ? bgbuf : "", cwidth, cwidth > 0 ? " " : "", cwidth > 0 ? "   " : "", txtclr ? fgbuf : "", label); printf((fmt), __VA_ARGS__); printf(C_RESET "\n"); } while (0)
+#define PRINT_COLOR_EMPTY()          do { printf("%s%*s" C_RESET "\n", cheight-- > 0 ? bgbuf : "", cwidth, cwidth > 0 ? " " : ""); } while (0)
 #define DPLACES(_n, _d)              ((((_n) < 10) ? 1 : ((_n) < 100) ? 2 : 3) + (_d))
 #define CLAMP(_n, _l, _r)            ((_n) < (_l) ? (_l) : ((_n) > (_r) ? (_r) : (_n)))
 
@@ -22,7 +23,7 @@ static inline void print_help(const char* progname) {
     printf("\noptions:\n"
            "  -h        : show this help text\n"
            "  -d [0..10]: choose the maximum amount of decimal places to print             (default: 2)\n"
-           "  -w [0..25]: choose the width of the left color square to display (h = w / 2) (default: 10)\n"
+           "  -w [0..25]: choose the width of the left color square to display (h = w / 2) (default: 14)\n"
            "  -t        : disable coloring text output (useful for hard-to-read colors)    (default: true)\n"
            "  -x        : print colors in web format (css)                                 (default: false)\n");
     printf("\nvalid color formats (case-insensitive):\n"
@@ -55,7 +56,7 @@ int main(int argc, char **argv) {
     if (argc < 2) ERROR_EXIT("at least one argument must be passed (-h or color)");
 
     // terminal output config variables
-    int  cwidth  = 10;   // width of the color display on the left
+    int  cwidth  = 14;   // width of the color display on the left
                          // height is automatically computed as half of the width to (almost) create a square
     int  dplaces = 2;    // number of decimal places to round output to for numbers with decimal values (cmyk, hsl...)
     bool webfmt = false; // display colors in css format
@@ -97,6 +98,8 @@ int main(int argc, char **argv) {
         PRINT_COLOR("CMYK", "cmyk(%.*g%%,%.*g%%,%.*g%%,%.*g%%)", DPLACES(color.cmyk.c * 100.0, dplaces), color.cmyk.c * 100.0, DPLACES(color.cmyk.m * 100.0, dplaces), color.cmyk.m * 100.0, DPLACES(color.cmyk.y * 100.0, dplaces), color.cmyk.y * 100.0, DPLACES(color.cmyk.k * 100.0, dplaces), color.cmyk.k * 100.0);
         PRINT_COLOR("HSL" , "hsl(%.*g,%.*g%%,%.*g%%)",           DPLACES(color.hsl.h, dplaces), color.hsl.h, DPLACES(color.hsl.sat * 100.0, dplaces), color.hsl.sat * 100.0, DPLACES(color.hsl.l * 100.0, dplaces), color.hsl.l * 100.0);
         PRINT_COLOR("HSV" , "hsv(%.*g,%.*g%%,%.*g%%)",           DPLACES(color.hsv.h, dplaces), color.hsv.h, DPLACES(color.hsv.sat * 100.0, dplaces), color.hsv.sat * 100.0, DPLACES(color.hsv.v * 100.0, dplaces), color.hsv.v * 100.0);
+        PRINT_COLOR_EMPTY();
+        PRINT_COLOR("Named" , "%s (#%06x)",                      color.named.name, color.named.hex);
     }
     else {
         PRINT_COLOR("RGB" , "%d,%d,%d",                          color.rgb.r, color.rgb.g, color.rgb.b);
@@ -104,6 +107,8 @@ int main(int argc, char **argv) {
         PRINT_COLOR("CMYK", "%.*g%%,%.*g%%,%.*g%%,%.*g%%",       DPLACES(color.cmyk.c * 100.0, dplaces), color.cmyk.c * 100.0, DPLACES(color.cmyk.m * 100.0, dplaces), color.cmyk.m * 100.0, DPLACES(color.cmyk.y * 100.0, dplaces), color.cmyk.y * 100.0, DPLACES(color.cmyk.k * 100.0, dplaces), color.cmyk.k * 100.0);
         PRINT_COLOR("HSL" , "%.*g,%.*g%%,%.*g%%",                DPLACES(color.hsl.h, dplaces), color.hsl.h, DPLACES(color.hsl.sat * 100.0, dplaces), color.hsl.sat * 100.0, DPLACES(color.hsl.l * 100.0, dplaces), color.hsl.l * 100.0);
         PRINT_COLOR("HSV" , "%.*g,%.*g%%,%.*g%%",                DPLACES(color.hsv.h, dplaces), color.hsv.h, DPLACES(color.hsv.sat * 100.0, dplaces), color.hsv.sat * 100.0, DPLACES(color.hsv.v * 100.0, dplaces), color.hsv.v * 100.0);
+        PRINT_COLOR_EMPTY();
+        PRINT_COLOR("Named" , "%s (%06x)",                       color.named.name, color.named.hex);
     }
     for(; cheight > 0; --cheight) printf("%s%*s" C_RESET "\n", bgbuf, cwidth, " ");
 

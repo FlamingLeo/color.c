@@ -1,5 +1,7 @@
 # color.c - A Color Printing and Conversion Tool
 
+![example run](img/example.png)
+
 `color.c` is a command-line tool designed for terminals with 24-bit color support which automatically parses the input color, displays it and shows a list of conversions to other common color models.
 
 ## Usage and Formats
@@ -9,7 +11,7 @@ Following options are supported:
 ```text
 -h        : show this help text\n"
 -d [0..10]: choose the maximum amount of decimal places to print             (default: 2)
--w [0..25]: choose the width of the left color square to display (h = w / 2) (default: 10)
+-w [0..25]: choose the width of the left color square to display (h = w / 2) (default: 14)
 -t        : disable coloring text output (useful for hard-to-read colors)    (default: true)
 -x        : print colors in web format (css)                                 (default: false)
 ```
@@ -17,6 +19,7 @@ Following options are supported:
 **NOTE**: Use `-w 0` to disable the color block or `-d 0` to round to the nearest integer.
 
 Following color models and input formats are supported (case-insensitive, whitespace allowed):
+- **Named CSS**: Any valid named CSS color will work.
 - **RGB** (`r`, `g`, `b` between 0 and 255 as integers or between 0.0 and 1.0 as floats): 
     - `rgb(r,g,b)`
     - `r,g,b`
@@ -47,7 +50,7 @@ Read more about the supported formats here: [RGB](https://en.wikipedia.org/wiki/
 
 The repository provides a simple shell script for Linux which builds the program and installs (copies) it to `/usr/local/bin`. You may provide an optional `name` argument to install the binary under a different name, to prevent clashing with another program (the name is pretty basic, after all).
 
-Alternatively, you can just build the executable in the root directory of the repository using `make`. Unit tests are available using `make test`.
+Alternatively, you can just build the executable in the root directory of the repository using `make`.Unit tests are available using `make test`.
 
 ## License (?)
 [Do whatever you want](https://en.wikipedia.org/wiki/WTFPL), I don't know, I'm not good at this legal stuff anyway.

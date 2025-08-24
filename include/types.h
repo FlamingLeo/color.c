@@ -27,11 +27,12 @@ typedef struct { const char *name; hex_t hex; } named_t;
 
 // color struct including all color models
 typedef struct { 
-    rgb_t  rgb;
-    hex_t  hex;
-    cmyk_t cmyk;
-    hsl_t  hsl;
-    hsv_t  hsv;
+    rgb_t   rgb;
+    hex_t   hex;
+    cmyk_t  cmyk;
+    hsl_t   hsl;
+    hsv_t   hsv;
+    named_t named;
 } color_t;
 
 // parser function for parsing a string

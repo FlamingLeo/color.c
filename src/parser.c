@@ -44,6 +44,40 @@ static const named_t css_colors[] = {
     { "whitesmoke", 0xf5f5f5 },{ "yellow", 0xffff00 },{ "yellowgreen", 0x9acd32 },
 };
 
+// squared weighted distance between two rgb colors (components 0..255)
+static inline double weighted_dist2_rgb(const rgb_t *a, const rgb_t *b, double wr, double wg, double wb) {
+    double dr = (double)a->r - (double)b->r;
+    double dg = (double)a->g - (double)b->g;
+    double db = (double)a->b - (double)b->b;
+    return wr * dr * dr + wg * dg * dg + wb * db * db;
+}
+
+// find idx of closest named color using weighted squared rgb distance
+// technically, doing it with rgb isn't the best (even weighted), but imo it's a fast and good enough way of doing it for this small sample size
+static int closest_named_weighted_rgb_index(const rgb_t *in) {
+    if (!in) return -1;
+    size_t n = sizeof(css_colors) / sizeof(css_colors[0]);
+
+    // source: https://www.compuphase.com/cmetric.htm
+    const double wr = 0.22216091748149788;
+    const double wg = 0.4288860259783791;
+    const double wb = 0.34895305654012304;
+
+    double best_score = 1.79769e+308; // DBL_MAX
+    int best_idx = -1;
+
+    for (size_t i = 0; i < n; ++i) {
+        rgb_t named = hex_to_rgb(css_colors[i].hex);
+        double d = weighted_dist2_rgb(in, &named, wr, wg, wb);
+        if (d < best_score) {
+            best_score = d;
+            best_idx = (int)i;
+        }
+    }
+    return best_idx;
+}
+
+
 // helper function to normalize string in-place by removing whitespaces and converting upper- to lowercase
 // the result is guaranteed to be shorter or equal in length to the input
 static inline void norm(char *s) {
@@ -69,11 +103,12 @@ static inline int parse_named(char *s, color_t *out) {
     for (size_t i = 0; i < n; ++i) {
         if (strcmp(s, css_colors[i].name) == 0) {
             hex_t v = css_colors[i].hex;
-            out->hex  = v;
-            out->rgb  = hex_to_rgb(v);
-            out->cmyk = rgb_to_cmyk(&out->rgb);
-            out->hsl  = rgb_to_hsl(&out->rgb);
-            out->hsv  = rgb_to_hsv(&out->rgb);
+            out->hex   = v;
+            out->rgb   = hex_to_rgb(v);
+            out->cmyk  = rgb_to_cmyk(&out->rgb);
+            out->hsl   = rgb_to_hsl(&out->rgb);
+            out->hsv   = rgb_to_hsv(&out->rgb);
+            out->named = css_colors[i];
             return 1;
         }
     }
@@ -114,11 +149,12 @@ static inline int parse_hex(char *s, color_t *out) {
         if (sscanf(p, "%6x", &v) != 1) return 0;
     } else return 0; // invalid length
 
-    out->hex  = v;
-    out->rgb  = hex_to_rgb(v);
-    out->cmyk = rgb_to_cmyk(&out->rgb);
-    out->hsl  = rgb_to_hsl(&out->rgb);
-    out->hsv  = rgb_to_hsv(&out->rgb);
+    out->hex   = v;
+    out->rgb   = hex_to_rgb(v);
+    out->cmyk  = rgb_to_cmyk(&out->rgb);
+    out->hsl   = rgb_to_hsl(&out->rgb);
+    out->hsv   = rgb_to_hsv(&out->rgb);
+    out->named = css_colors[closest_named_weighted_rgb_index(&out->rgb)];
     return 1;
 }
 
@@ -142,11 +178,12 @@ static inline int parse_rgb(char *s, color_t *out) {
     if (sscanf(p, "%d,%d,%d%n", &a, &b, &c, &n) == 3 && p[n] == '\0') {
         // integers (0,0,0 - 255,255,255)
         if (a >= 0 && a <= 255 && b >= 0 && b <= 255 && c >= 0 && c <= 255) {
-            out->rgb  = (rgb_t){ .r = a, .g = b, .b = c };
-            out->hex  = rgb_to_hex(&out->rgb);
-            out->cmyk = rgb_to_cmyk(&out->rgb);
-            out->hsl  = rgb_to_hsl(&out->rgb);
-            out->hsv  = rgb_to_hsv(&out->rgb);
+            out->rgb   = (rgb_t){ .r = a, .g = b, .b = c };
+            out->hex   = rgb_to_hex(&out->rgb);
+            out->cmyk  = rgb_to_cmyk(&out->rgb);
+            out->hsl   = rgb_to_hsl(&out->rgb);
+            out->hsv   = rgb_to_hsv(&out->rgb);
+            out->named = css_colors[closest_named_weighted_rgb_index(&out->rgb)];
             return 1;
         }
     } else if (sscanf(p, "%lf,%lf,%lf%n", &fa, &fb, &fc, &n) == 3 && p[n] == '\0') {
@@ -155,10 +192,11 @@ static inline int parse_rgb(char *s, color_t *out) {
             out->rgb = (rgb_t){ .r = (int)round(fa * 255.0), 
                                 .g = (int)round(fb * 255.0), 
                                 .b = (int)round(fc * 255.0) };
-            out->hex  = rgb_to_hex(&out->rgb);
-            out->cmyk = rgb_to_cmyk(&out->rgb);
-            out->hsl  = rgb_to_hsl(&out->rgb);
-            out->hsv  = rgb_to_hsv(&out->rgb);
+            out->hex   = rgb_to_hex(&out->rgb);
+            out->cmyk  = rgb_to_cmyk(&out->rgb);
+            out->hsl   = rgb_to_hsl(&out->rgb);
+            out->hsv   = rgb_to_hsv(&out->rgb);
+            out->named = css_colors[closest_named_weighted_rgb_index(&out->rgb)];
             return 1;
         }
     }
@@ -197,11 +235,12 @@ static inline int parse_cmyk(char *s, color_t *out) {
         if (k > 1.0) k /= 100.0;
     } else return 0;
 
-    out->cmyk = (cmyk_t){ .c = c, .m = m, .y = y, .k = k };
-    out->rgb  = cmyk_to_rgb(&out->cmyk);
-    out->hex  = rgb_to_hex(&out->rgb);
-    out->hsl  = rgb_to_hsl(&out->rgb);
-    out->hsv  = rgb_to_hsv(&out->rgb);
+    out->cmyk  = (cmyk_t){ .c = c, .m = m, .y = y, .k = k };
+    out->rgb   = cmyk_to_rgb(&out->cmyk);
+    out->hex   = rgb_to_hex(&out->rgb);
+    out->hsl   = rgb_to_hsl(&out->rgb);
+    out->hsv   = rgb_to_hsv(&out->rgb);
+    out->named = css_colors[closest_named_weighted_rgb_index(&out->rgb)];
     return 1;
 }
 
@@ -233,11 +272,12 @@ static inline int parse_hsl(char *s, color_t *out)  {
         if (l > 1)   l   /= 100.0;
     } else return 0;
 
-    out->hsl  = (hsl_t){ .h = fmod(h, 360.0), .sat = sat, .l = l };
-    out->rgb  = hsl_to_rgb(&out->hsl);
-    out->hex  = rgb_to_hex(&out->rgb);
-    out->cmyk = rgb_to_cmyk(&out->rgb);
-    out->hsv  = rgb_to_hsv(&out->rgb);
+    out->hsl   = (hsl_t){ .h = fmod(h, 360.0), .sat = sat, .l = l };
+    out->rgb   = hsl_to_rgb(&out->hsl);
+    out->hex   = rgb_to_hex(&out->rgb);
+    out->cmyk  = rgb_to_cmyk(&out->rgb);
+    out->hsv   = rgb_to_hsv(&out->rgb);
+    out->named = css_colors[closest_named_weighted_rgb_index(&out->rgb)];
     return 1;
 }
 
@@ -280,11 +320,12 @@ static inline int parse_hsv(char *s, color_t *out)
         else return 0; // bare non-percent triples are NOT accepted
     }
 
-    out->hsv  = (hsv_t){ .h = fmod(h, 360.0), .sat = sat, .v = v };
-    out->rgb  = hsv_to_rgb(&out->hsv);
-    out->hex  = rgb_to_hex(&out->rgb);
-    out->cmyk = rgb_to_cmyk(&out->rgb);
-    out->hsl  = rgb_to_hsl(&out->rgb);
+    out->hsv   = (hsv_t){ .h = fmod(h, 360.0), .sat = sat, .v = v };
+    out->rgb   = hsv_to_rgb(&out->hsv);
+    out->hex   = rgb_to_hex(&out->rgb);
+    out->cmyk  = rgb_to_cmyk(&out->rgb);
+    out->hsl   = rgb_to_hsl(&out->rgb);
+    out->named = css_colors[closest_named_weighted_rgb_index(&out->rgb)];
     return 1;
 }
 
@@ -322,3 +363,4 @@ int parse_color(const char *in, color_t *out)
 }
 
 // TODO: alpha
+// TODO: lab space, CI76 or some better metric
