@@ -9,39 +9,46 @@
 
 #define COPY_OR_RETURN(_dst,_src) do { int n = snprintf(_dst, sizeof(_dst), "%s", _src); if (n < 0) return 0; if ((size_t)n >= sizeof(_dst)) return 0; } while (0)
 
-// all 140 named css colors
+// all 148 named css colors
 // source: https://github.com/bahamas10/css-color-names/
 static const named_t css_colors[] = {
-    { "aliceblue", 0xf0f8ff },{ "antiquewhite", 0xfaebd7 },{ "aqua", 0x00ffff },{ "aquamarine", 0x7fffd4 },{ "azure", 0xf0ffff },
-    { "beige", 0xf5f5dc },{ "bisque", 0xffe4c4 },{ "black", 0x000000 },{ "blanchedalmond", 0xffebcd },{ "blue", 0x0000ff },
-    { "blueviolet", 0x8a2be2 },{ "brown", 0xa52a2a },{ "burlywood", 0xdeb887 },{ "cadetblue", 0x5f9ea0 },{ "chartreuse", 0x7fff00 },
-    { "chocolate", 0xd2691e },{ "coral", 0xff7f50 },{ "cornflowerblue", 0x6495ed },{ "cornsilk", 0xfff8dc },{ "crimson", 0xdc143c },
-    { "cyan", 0x00ffff },{ "darkblue", 0x00008b },{ "darkcyan", 0x008b8b },{ "darkgoldenrod", 0xb8860b },{ "darkgray", 0xa9a9a9 },
-    { "darkgreen", 0x006400 },{ "darkgrey", 0xa9a9a9 },{ "darkkhaki", 0xbdb76b },{ "darkmagenta", 0x8b008b },{ "darkolivegreen", 0x556b2f },
-    { "darkorange", 0xff8c00 },{ "darkorchid", 0x9932cc },{ "darkred", 0x8b0000 },{ "darksalmon", 0xe9967a },{ "darkseagreen", 0x8fbc8f },
-    { "darkslateblue", 0x483d8b },{ "darkslategray", 0x2f4f4f },{ "darkslategrey", 0x2f4f4f },{ "darkturquoise", 0x00ced1 },{ "darkviolet", 0x9400d3 },
-    { "deeppink", 0xff1493 },{ "deepskyblue", 0x00bfff },{ "dimgray", 0x696969 },{ "dimgrey", 0x696969 },{ "dodgerblue", 0x1e90ff },
-    { "firebrick", 0xb22222 },{ "floralwhite", 0xfffaf0 },{ "forestgreen", 0x228b22 },{ "fuchsia", 0xff00ff },{ "gainsboro", 0xdcdcdc },
-    { "ghostwhite", 0xf8f8ff },{ "goldenrod", 0xdaa520 },{ "gold", 0xffd700 },{ "gray", 0x808080 },{ "green", 0x008000 },
-    { "greenyellow", 0xadff2f },{ "grey", 0x808080 },{ "honeydew", 0xf0fff0 },{ "hotpink", 0xff69b4 },{ "indianred", 0xcd5c5c },
-    { "indigo", 0x4b0082 },{ "ivory", 0xfffff0 },{ "khaki", 0xf0e68c },{ "lavenderblush", 0xfff0f5 },{ "lavender", 0xe6e6fa },
-    { "lawngreen", 0x7cfc00 },{ "lemonchiffon", 0xfffacd },{ "lightblue", 0xadd8e6 },{ "lightcoral", 0xf08080 },{ "lightcyan", 0xe0ffff },
-    { "lightgoldenrodyellow", 0xfafad2 },{ "lightgray", 0xd3d3d3 },{ "lightgreen", 0x90ee90 },{ "lightgrey", 0xd3d3d3 },{ "lightpink", 0xffb6c1 },
-    { "lightsalmon", 0xffa07a },{ "lightseagreen", 0x20b2aa },{ "lightskyblue", 0x87cefa },{ "lightslategray", 0x778899 },{ "lightslategrey", 0x778899 },
-    { "lightsteelblue", 0xb0c4de },{ "lightyellow", 0xffffe0 },{ "lime", 0x00ff00 },{ "limegreen", 0x32cd32 },{ "linen", 0xfaf0e6 },
-    { "magenta", 0xff00ff },{ "maroon", 0x800000 },{ "mediumaquamarine", 0x66cdaa },{ "mediumblue", 0x0000cd },{ "mediumorchid", 0xba55d3 },
-    { "mediumpurple", 0x9370db },{ "mediumseagreen", 0x3cb371 },{ "mediumslateblue", 0x7b68ee },{ "mediumspringgreen", 0x00fa9a },{ "mediumturquoise", 0x48d1cc },
-    { "mediumvioletred", 0xc71585 },{ "midnightblue", 0x191970 },{ "mintcream", 0xf5fffa },{ "mistyrose", 0xffe4e1 },{ "moccasin", 0xffe4b5 },
-    { "navajowhite", 0xffdead },{ "navy", 0x000080 },{ "oldlace", 0xfdf5e6 },{ "olive", 0x808000 },{ "olivedrab", 0x6b8e23 },
-    { "orange", 0xffa500 },{ "orangered", 0xff4500 },{ "orchid", 0xda70d6 },{ "palegoldenrod", 0xeee8aa },{ "palegreen", 0x98fb98 },
-    { "paleturquoise", 0xafeeee },{ "palevioletred", 0xdb7093 },{ "papayawhip", 0xffefd5 },{ "peachpuff", 0xffdab9 },{ "peru", 0xcd853f },
-    { "pink", 0xffc0cb },{ "plum", 0xdda0dd },{ "powderblue", 0xb0e0e6 },{ "purple", 0x800080 },{ "rebeccapurple", 0x663399 },
-    { "red", 0xff0000 },{ "rosybrown", 0xbc8f8f },{ "royalblue", 0x4169e1 },{ "saddlebrown", 0x8b4513 },{ "salmon", 0xfa8072 },
-    { "sandybrown", 0xf4a460 },{ "seagreen", 0x2e8b57 },{ "seashell", 0xfff5ee },{ "sienna", 0xa0522d },{ "silver", 0xc0c0c0 },
-    { "skyblue", 0x87ceeb },{ "slateblue", 0x6a5acd },{ "slategray", 0x708090 },{ "slategrey", 0x708090 },{ "snow", 0xfffafa },
-    { "springgreen", 0x00ff7f },{ "steelblue", 0x4682b4 },{ "tan", 0xd2b48c },{ "teal", 0x008080 },{ "thistle", 0xd8bfd8 },
-    { "tomato", 0xff6347 },{ "turquoise", 0x40e0d0 },{ "violet", 0xee82ee },{ "wheat", 0xf5deb3 },{ "white", 0xffffff },
-    { "whitesmoke", 0xf5f5f5 },{ "yellow", 0xffff00 },{ "yellowgreen", 0x9acd32 },
+    { "aliceblue"           , 0xf0f8ff, 0.0 }, { "antiquewhite"        , 0xfaebd7, 0.0 }, { "aqua"                , 0x00ffff, 0.0 }, { "aquamarine"          , 0x7fffd4, 0.0 }, 
+    { "azure"               , 0xf0ffff, 0.0 }, { "beige"               , 0xf5f5dc, 0.0 }, { "bisque"              , 0xffe4c4, 0.0 }, { "black"               , 0x000000, 0.0 }, 
+    { "blanchedalmond"      , 0xffebcd, 0.0 }, { "blue"                , 0x0000ff, 0.0 }, { "blueviolet"          , 0x8a2be2, 0.0 }, { "brown"               , 0xa52a2a, 0.0 }, 
+    { "burlywood"           , 0xdeb887, 0.0 }, { "cadetblue"           , 0x5f9ea0, 0.0 }, { "chartreuse"          , 0x7fff00, 0.0 }, { "chocolate"           , 0xd2691e, 0.0 }, 
+    { "coral"               , 0xff7f50, 0.0 }, { "cornflowerblue"      , 0x6495ed, 0.0 }, { "cornsilk"            , 0xfff8dc, 0.0 }, { "crimson"             , 0xdc143c, 0.0 }, 
+    { "cyan"                , 0x00ffff, 0.0 }, { "darkblue"            , 0x00008b, 0.0 }, { "darkcyan"            , 0x008b8b, 0.0 }, { "darkgoldenrod"       , 0xb8860b, 0.0 }, 
+    { "darkgray"            , 0xa9a9a9, 0.0 }, { "darkgreen"           , 0x006400, 0.0 }, { "darkgrey"            , 0xa9a9a9, 0.0 }, { "darkkhaki"           , 0xbdb76b, 0.0 }, 
+    { "darkmagenta"         , 0x8b008b, 0.0 }, { "darkolivegreen"      , 0x556b2f, 0.0 }, { "darkorange"          , 0xff8c00, 0.0 }, { "darkorchid"          , 0x9932cc, 0.0 }, 
+    { "darkred"             , 0x8b0000, 0.0 }, { "darksalmon"          , 0xe9967a, 0.0 }, { "darkseagreen"        , 0x8fbc8f, 0.0 }, { "darkslateblue"       , 0x483d8b, 0.0 }, 
+    { "darkslategray"       , 0x2f4f4f, 0.0 }, { "darkslategrey"       , 0x2f4f4f, 0.0 }, { "darkturquoise"       , 0x00ced1, 0.0 }, { "darkviolet"          , 0x9400d3, 0.0 }, 
+    { "deeppink"            , 0xff1493, 0.0 }, { "deepskyblue"         , 0x00bfff, 0.0 }, { "dimgray"             , 0x696969, 0.0 }, { "dimgrey"             , 0x696969, 0.0 }, 
+    { "dodgerblue"          , 0x1e90ff, 0.0 }, { "firebrick"           , 0xb22222, 0.0 }, { "floralwhite"         , 0xfffaf0, 0.0 }, { "forestgreen"         , 0x228b22, 0.0 }, 
+    { "fuchsia"             , 0xff00ff, 0.0 }, { "gainsboro"           , 0xdcdcdc, 0.0 }, { "ghostwhite"          , 0xf8f8ff, 0.0 }, { "goldenrod"           , 0xdaa520, 0.0 }, 
+    { "gold"                , 0xffd700, 0.0 }, { "gray"                , 0x808080, 0.0 }, { "green"               , 0x008000, 0.0 }, { "greenyellow"         , 0xadff2f, 0.0 }, 
+    { "grey"                , 0x808080, 0.0 }, { "honeydew"            , 0xf0fff0, 0.0 }, { "hotpink"             , 0xff69b4, 0.0 }, { "indianred"           , 0xcd5c5c, 0.0 }, 
+    { "indigo"              , 0x4b0082, 0.0 }, { "ivory"               , 0xfffff0, 0.0 }, { "khaki"               , 0xf0e68c, 0.0 }, { "lavenderblush"       , 0xfff0f5, 0.0 }, 
+    { "lavender"            , 0xe6e6fa, 0.0 }, { "lawngreen"           , 0x7cfc00, 0.0 }, { "lemonchiffon"        , 0xfffacd, 0.0 }, { "lightblue"           , 0xadd8e6, 0.0 }, 
+    { "lightcoral"          , 0xf08080, 0.0 }, { "lightcyan"           , 0xe0ffff, 0.0 }, { "lightgoldenrodyellow", 0xfafad2, 0.0 }, { "lightgray"           , 0xd3d3d3, 0.0 }, 
+    { "lightgreen"          , 0x90ee90, 0.0 }, { "lightgrey"           , 0xd3d3d3, 0.0 }, { "lightpink"           , 0xffb6c1, 0.0 }, { "lightsalmon"         , 0xffa07a, 0.0 }, 
+    { "lightseagreen"       , 0x20b2aa, 0.0 }, { "lightskyblue"        , 0x87cefa, 0.0 }, { "lightslategray"      , 0x778899, 0.0 }, { "lightslategrey"      , 0x778899, 0.0 }, 
+    { "lightsteelblue"      , 0xb0c4de, 0.0 }, { "lightyellow"         , 0xffffe0, 0.0 }, { "lime"                , 0x00ff00, 0.0 }, { "limegreen"           , 0x32cd32, 0.0 }, 
+    { "linen"               , 0xfaf0e6, 0.0 }, { "magenta"             , 0xff00ff, 0.0 }, { "maroon"              , 0x800000, 0.0 }, { "mediumaquamarine"    , 0x66cdaa, 0.0 }, 
+    { "mediumblue"          , 0x0000cd, 0.0 }, { "mediumorchid"        , 0xba55d3, 0.0 }, { "mediumpurple"        , 0x9370db, 0.0 }, { "mediumseagreen"      , 0x3cb371, 0.0 }, 
+    { "mediumslateblue"     , 0x7b68ee, 0.0 }, { "mediumspringgreen"   , 0x00fa9a, 0.0 }, { "mediumturquoise"     , 0x48d1cc, 0.0 }, { "mediumvioletred"     , 0xc71585, 0.0 }, 
+    { "midnightblue"        , 0x191970, 0.0 }, { "mintcream"           , 0xf5fffa, 0.0 }, { "mistyrose"           , 0xffe4e1, 0.0 }, { "moccasin"            , 0xffe4b5, 0.0 }, 
+    { "navajowhite"         , 0xffdead, 0.0 }, { "navy"                , 0x000080, 0.0 }, { "oldlace"             , 0xfdf5e6, 0.0 }, { "olive"               , 0x808000, 0.0 }, 
+    { "olivedrab"           , 0x6b8e23, 0.0 }, { "orange"              , 0xffa500, 0.0 }, { "orangered"           , 0xff4500, 0.0 }, { "orchid"              , 0xda70d6, 0.0 }, 
+    { "palegoldenrod"       , 0xeee8aa, 0.0 }, { "palegreen"           , 0x98fb98, 0.0 }, { "paleturquoise"       , 0xafeeee, 0.0 }, { "palevioletred"       , 0xdb7093, 0.0 }, 
+    { "papayawhip"          , 0xffefd5, 0.0 }, { "peachpuff"           , 0xffdab9, 0.0 }, { "peru"                , 0xcd853f, 0.0 }, { "pink"                , 0xffc0cb, 0.0 }, 
+    { "plum"                , 0xdda0dd, 0.0 }, { "powderblue"          , 0xb0e0e6, 0.0 }, { "purple"              , 0x800080, 0.0 }, { "rebeccapurple"       , 0x663399, 0.0 }, 
+    { "red"                 , 0xff0000, 0.0 }, { "rosybrown"           , 0xbc8f8f, 0.0 }, { "royalblue"           , 0x4169e1, 0.0 }, { "saddlebrown"         , 0x8b4513, 0.0 }, 
+    { "salmon"              , 0xfa8072, 0.0 }, { "sandybrown"          , 0xf4a460, 0.0 }, { "seagreen"            , 0x2e8b57, 0.0 }, { "seashell"            , 0xfff5ee, 0.0 }, 
+    { "sienna"              , 0xa0522d, 0.0 }, { "silver"              , 0xc0c0c0, 0.0 }, { "skyblue"             , 0x87ceeb, 0.0 }, { "slateblue"           , 0x6a5acd, 0.0 }, 
+    { "slategray"           , 0x708090, 0.0 }, { "slategrey"           , 0x708090, 0.0 }, { "snow"                , 0xfffafa, 0.0 }, { "springgreen"         , 0x00ff7f, 0.0 }, 
+    { "steelblue"           , 0x4682b4, 0.0 }, { "tan"                 , 0xd2b48c, 0.0 }, { "teal"                , 0x008080, 0.0 }, { "thistle"             , 0xd8bfd8, 0.0 }, 
+    { "tomato"              , 0xff6347, 0.0 }, { "turquoise"           , 0x40e0d0, 0.0 }, { "violet"              , 0xee82ee, 0.0 }, { "wheat"               , 0xf5deb3, 0.0 }, 
+    { "white"               , 0xffffff, 0.0 }, { "whitesmoke"          , 0xf5f5f5, 0.0 }, { "yellow"              , 0xffff00, 0.0 }, { "yellowgreen"         , 0x9acd32, 0.0 }, 
 };
 
 // squared weighted distance between two rgb colors (components 0..255)
@@ -52,10 +59,9 @@ static inline double weighted_dist2_rgb(const rgb_t *a, const rgb_t *b, double w
     return wr * dr * dr + wg * dg * dg + wb * db * db;
 }
 
-// find idx of closest named color using weighted squared rgb distance
+// find closest named color using weighted squared rgb distance
 // technically, doing it with rgb isn't the best (even weighted), but imo it's a fast and good enough way of doing it for this small sample size
-static int closest_named_weighted_rgb_index(const rgb_t *in) {
-    if (!in) return -1;
+static named_t closest_named_weighted_rgb(const rgb_t *in) {
     size_t n = sizeof(css_colors) / sizeof(css_colors[0]);
 
     // source: https://www.compuphase.com/cmetric.htm
@@ -64,17 +70,20 @@ static int closest_named_weighted_rgb_index(const rgb_t *in) {
     const double wb = 0.34895305654012304;
 
     double best_score = 1.79769e+308; // DBL_MAX
-    int best_idx = -1;
+    size_t best_idx = 0;
 
     for (size_t i = 0; i < n; ++i) {
         rgb_t named = hex_to_rgb(css_colors[i].hex);
         double d = weighted_dist2_rgb(in, &named, wr, wg, wb);
         if (d < best_score) {
             best_score = d;
-            best_idx = (int)i;
+            best_idx = i;
         }
     }
-    return best_idx;
+
+    named_t closest = css_colors[best_idx];
+    closest.diff = best_score;
+    return closest;
 }
 
 
@@ -154,7 +163,7 @@ static inline int parse_hex(char *s, color_t *out) {
     out->cmyk  = rgb_to_cmyk(&out->rgb);
     out->hsl   = rgb_to_hsl(&out->rgb);
     out->hsv   = rgb_to_hsv(&out->rgb);
-    out->named = css_colors[closest_named_weighted_rgb_index(&out->rgb)];
+    out->named = closest_named_weighted_rgb(&out->rgb);
     return 1;
 }
 
@@ -183,7 +192,7 @@ static inline int parse_rgb(char *s, color_t *out) {
             out->cmyk  = rgb_to_cmyk(&out->rgb);
             out->hsl   = rgb_to_hsl(&out->rgb);
             out->hsv   = rgb_to_hsv(&out->rgb);
-            out->named = css_colors[closest_named_weighted_rgb_index(&out->rgb)];
+            out->named = closest_named_weighted_rgb(&out->rgb);
             return 1;
         }
     } else if (sscanf(p, "%lf,%lf,%lf%n", &fa, &fb, &fc, &n) == 3 && p[n] == '\0') {
@@ -196,7 +205,7 @@ static inline int parse_rgb(char *s, color_t *out) {
             out->cmyk  = rgb_to_cmyk(&out->rgb);
             out->hsl   = rgb_to_hsl(&out->rgb);
             out->hsv   = rgb_to_hsv(&out->rgb);
-            out->named = css_colors[closest_named_weighted_rgb_index(&out->rgb)];
+            out->named = closest_named_weighted_rgb(&out->rgb);
             return 1;
         }
     }
@@ -240,7 +249,7 @@ static inline int parse_cmyk(char *s, color_t *out) {
     out->hex   = rgb_to_hex(&out->rgb);
     out->hsl   = rgb_to_hsl(&out->rgb);
     out->hsv   = rgb_to_hsv(&out->rgb);
-    out->named = css_colors[closest_named_weighted_rgb_index(&out->rgb)];
+    out->named = closest_named_weighted_rgb(&out->rgb);
     return 1;
 }
 
@@ -277,7 +286,7 @@ static inline int parse_hsl(char *s, color_t *out)  {
     out->hex   = rgb_to_hex(&out->rgb);
     out->cmyk  = rgb_to_cmyk(&out->rgb);
     out->hsv   = rgb_to_hsv(&out->rgb);
-    out->named = css_colors[closest_named_weighted_rgb_index(&out->rgb)];
+    out->named = closest_named_weighted_rgb(&out->rgb);
     return 1;
 }
 
@@ -324,7 +333,7 @@ static inline int parse_hsv(char *s, color_t *out) {
     out->hex   = rgb_to_hex(&out->rgb);
     out->cmyk  = rgb_to_cmyk(&out->rgb);
     out->hsl   = rgb_to_hsl(&out->rgb);
-    out->named = css_colors[closest_named_weighted_rgb_index(&out->rgb)];
+    out->named = closest_named_weighted_rgb(&out->rgb);
     return 1;
 }
 

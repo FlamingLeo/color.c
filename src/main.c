@@ -98,21 +98,21 @@ int main(int argc, char **argv) {
     color_t color = { 0 }; if(!parse_color(colorbuf, &color)) ERROR_EXIT("invalid syntax %s", colorbuf);
 
     // copy css formatted strings into buffers
-    char rgb[C_COL_BUFSIZE], hex[C_COL_BUFSIZE], cmyk[C_COL_BUFSIZE], hsl[C_COL_BUFSIZE], hsv[C_COL_BUFSIZE], named[C_COL_BUFSIZE];
+    char rgb[C_COL_BUFSIZE], hex[C_COL_BUFSIZE], cmyk[C_COL_BUFSIZE], hsl[C_COL_BUFSIZE], hsv[C_COL_BUFSIZE], named[STR_BUFSIZE];
     if(webfmt) {
         snprintf(rgb,   sizeof(rgb),   "rgb(%d,%d,%d)",                     color.rgb.r, color.rgb.g, color.rgb.b); 
         snprintf(hex,   sizeof(hex),   "#%06x",                             color.hex);
         snprintf(cmyk,  sizeof(cmyk),  "cmyk(%.*g%%,%.*g%%,%.*g%%,%.*g%%)", DPLACES(color.cmyk.c * 100.0, dplaces), color.cmyk.c * 100.0, DPLACES(color.cmyk.m * 100.0, dplaces), color.cmyk.m * 100.0, DPLACES(color.cmyk.y * 100.0, dplaces), color.cmyk.y * 100.0, DPLACES(color.cmyk.k * 100.0, dplaces), color.cmyk.k * 100.0);
         snprintf(hsl,   sizeof(hsl),   "hsl(%.*g,%.*g%%,%.*g%%)",           DPLACES(color.hsl.h, dplaces), color.hsl.h, DPLACES(color.hsl.sat * 100.0, dplaces), color.hsl.sat * 100.0, DPLACES(color.hsl.l * 100.0, dplaces), color.hsl.l * 100.0);
         snprintf(hsv,   sizeof(hsv),   "hsv(%.*g,%.*g%%,%.*g%%)",           DPLACES(color.hsv.h, dplaces), color.hsv.h, DPLACES(color.hsv.sat * 100.0, dplaces), color.hsv.sat * 100.0, DPLACES(color.hsv.v * 100.0, dplaces), color.hsv.v * 100.0);
-        snprintf(named, sizeof(named), "%s (#%06x)",                        color.named.name, color.named.hex);
+        snprintf(named, sizeof(named), "%s (#%06x) (dist² %.*g)",      color.named.name, color.named.hex, DPLACES(color.named.diff, dplaces), color.named.diff);
     } else {
         snprintf(rgb,   sizeof(rgb),   "%d,%d,%d",                          color.rgb.r, color.rgb.g, color.rgb.b); 
         snprintf(hex,   sizeof(hex),   "%06x",                              color.hex);
         snprintf(cmyk,  sizeof(cmyk),  "%.*g%%,%.*g%%,%.*g%%,%.*g%%",       DPLACES(color.cmyk.c * 100.0, dplaces), color.cmyk.c * 100.0, DPLACES(color.cmyk.m * 100.0, dplaces), color.cmyk.m * 100.0, DPLACES(color.cmyk.y * 100.0, dplaces), color.cmyk.y * 100.0, DPLACES(color.cmyk.k * 100.0, dplaces), color.cmyk.k * 100.0);
         snprintf(hsl,   sizeof(hsl),   "%.*g,%.*g%%,%.*g%%",                DPLACES(color.hsl.h, dplaces), color.hsl.h, DPLACES(color.hsl.sat * 100.0, dplaces), color.hsl.sat * 100.0, DPLACES(color.hsl.l * 100.0, dplaces), color.hsl.l * 100.0);
         snprintf(hsv,   sizeof(hsv),   "%.*g,%.*g%%,%.*g%%",                DPLACES(color.hsv.h, dplaces), color.hsv.h, DPLACES(color.hsv.sat * 100.0, dplaces), color.hsv.sat * 100.0, DPLACES(color.hsv.v * 100.0, dplaces), color.hsv.v * 100.0);
-        snprintf(named, sizeof(named), "%s (%06x)",                         color.named.name, color.named.hex);
+        snprintf(named, sizeof(named), "%s (%06x) (dist² %.*g)",       color.named.name, color.named.hex, DPLACES(color.named.diff, dplaces), color.named.diff);
     }
 
     // if the user wants to do conversion, only display the converted model (or error for some unsupported model)

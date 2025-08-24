@@ -4,6 +4,7 @@
 !*/
 .vscode/
 obj/
+scripts/
 *.txt
 *.log
 *.json
