@@ -1,4 +1,5 @@
 # color.c - A Color Printing and Conversion Tool
+[![Tests](https://github.com/FlamingLeo/color.c/actions/workflows/run-tests.yml/badge.svg)](https://github.com/FlamingLeo/color.c/actions/workflows/run-tests.yml)
 
 ![example run](img/example.png)
 
