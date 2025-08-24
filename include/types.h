@@ -18,11 +18,12 @@
 #define C_LGREEN "\x1b[92m"
 
 // supported color models
-typedef struct { int r, g, b; }       rgb_t;
-typedef struct { double c, m, y, k; } cmyk_t;
-typedef struct { double h, sat, l; }  hsl_t;
-typedef struct { double h, sat, v; }  hsv_t;
-typedef unsigned                      hex_t;
+typedef struct { int r, g, b; }                 rgb_t;
+typedef struct { double c, m, y, k; }           cmyk_t;
+typedef struct { double h, sat, l; }            hsl_t;
+typedef struct { double h, sat, v; }            hsv_t;
+typedef unsigned                                hex_t;
+typedef struct { const char *name; hex_t hex; } named_t;
 
 // color struct including all color models
 typedef struct { 

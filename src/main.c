@@ -15,7 +15,7 @@
 #define CLAMP(_n, _l, _r)            ((_n) < (_l) ? (_l) : ((_n) > (_r) ? (_r) : (_n)))
 
 // helper print functions
-static inline void print_usage(FILE* stream, const char *progname) { fprintf(stream, "usage: %s [-h] color\nsee readme or help for a list of valid formats\n", progname); }
+static inline void print_usage(FILE* stream, const char *progname) { fprintf(stream, "usage: %s [-d n] [-w n] [-t] [-x] [-h] color\nsee readme or help for a list of valid formats\n", progname); }
 static inline void print_help(const char* progname) {
     printf(C_BOLD "color - a color printing (and conversion) tool for true color terminals\n\n" C_RESET);
     print_usage(stdout, progname);
@@ -88,8 +88,6 @@ int main(int argc, char **argv) {
     color_t color = { 0 }; if(!parse_color(colorbuf, &color)) ERROR_EXIT("invalid syntax %s", colorbuf);
 
     // do the thing
-    //
-    // for decimal places, i'm using a bit of a hacky workaround
     char bgbuf[C_STR_BUFSIZE]; snprintf(bgbuf, C_STR_BUFSIZE, "\033[48;2;%d;%d;%dm", color.rgb.r, color.rgb.g, color.rgb.b);
     char fgbuf[C_STR_BUFSIZE]; snprintf(fgbuf, C_STR_BUFSIZE, "\033[38;2;%d;%d;%dm", color.rgb.r, color.rgb.g, color.rgb.b);
     
