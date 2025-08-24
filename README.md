@@ -55,6 +55,9 @@ Read more about the supported formats here: [RGB](https://en.wikipedia.org/wiki/
 > [!NOTE]  
 > A simple triplet will be parsed as RGB. To differentiate between RGB and HSV, percentage symbols are needed for saturation and value. Because HSL and HSV have the same structure from the parser's point of view, a triplet where the last two contain percentages will be parsed as HSV.
 
+> [!IMPORTANT]  
+> XKCD names have had whitespaces removed to not break existing functionality. To separate between `darkgreen` and `dark green`, the latter was changed to `dark-green`.
+
 ## Build and  Installation
 **Usage**: `./install.sh [name]`
 

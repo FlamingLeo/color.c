@@ -63,7 +63,7 @@ const named_t xkcd_colors[] = {
     { "deepblue"                    , 0x040273, 0.0 }, { "nightblue"                   , 0x040348, 0.0 }, { "marine"                      , 0x042e60, 0.0 }, { "bottlegreen"                 , 0x044a05, 0.0 }, 
     { "darkturquoise"               , 0x045c5a, 0.0 }, { "seablue"                     , 0x047495, 0.0 }, { "junglegreen"                 , 0x048243, 0.0 }, { "cerulean"                    , 0x0485d1, 0.0 }, 
     { "aquamarine"                  , 0x04d8b2, 0.0 }, { "neonblue"                    , 0x04d9ff, 0.0 }, { "turquoisegreen"              , 0x04f489, 0.0 }, { "royalblue"                   , 0x0504aa, 0.0 }, 
-    { "evergreen"                   , 0x05472a, 0.0 }, { "britishracinggreen"          , 0x05480d, 0.0 }, { "darkgreen"                   , 0x054907, 0.0 }, { "darkaqua"                    , 0x05696b, 0.0 }, 
+    { "evergreen"                   , 0x05472a, 0.0 }, { "britishracinggreen"          , 0x05480d, 0.0 }, { "dark-green"                  , 0x054907, 0.0 }, { "darkaqua"                    , 0x05696b, 0.0 }, 
     { "ceruleanblue"                , 0x056eee, 0.0 }, { "brightseagreen"              , 0x05ffa6, 0.0 }, { "verydarkgreen"               , 0x062e03, 0.0 }, { "forestgreen"                 , 0x06470c, 0.0 }, 
     { "electricblue"                , 0x0652ff, 0.0 }, { "azure"                       , 0x069af3, 0.0 }, { "turquoiseblue"               , 0x06b1c4, 0.0 }, { "greenblue"                   , 0x06b48b, 0.0 }, 
     { "turquoise"                   , 0x06c2ac, 0.0 }, { "almostblack"                 , 0x070d0d, 0.0 }, { "primaryblue"                 , 0x0804f9, 0.0 }, { "deepaqua"                    , 0x08787f, 0.0 }, 
