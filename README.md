@@ -3,7 +3,9 @@
 
 ![example run](img/example.png)
 
-`color.c` is a command-line tool designed for terminals with 24-bit color support which automatically parses the input color, displays it and shows a list of conversions to other common color models.
+`color.c` is a command-line tool designed for terminals with 24-bit color support[^1] which automatically parses the input color, displays it and shows a list of conversions to other common color models.
+
+[^1]: For non-truecolor terminals, colorless and 16-/256-color mappings are available. This program also respects the [`NO_COLOR`](https://no-color.org/) environment variable.
 
 ## Usage and Formats
 **Usage**: `color [-c <model>] [-f <n>] [-h] [-j] [-l [0|1]] [-m <map>] [-p] [-w <n>] [-W] [-x] <color> <color>`
@@ -69,3 +71,5 @@ Alternatively, you can just build the executable in the root directory of the re
 
 ## License (?)
 [Do whatever you want](https://en.wikipedia.org/wiki/WTFPL), I don't know, I'm not good at this legal stuff anyway.
+
+If you're not interested in the main functionality of this program, you might still be interested in the conversions to and from various color models in `src/converter.c`. Feel free to use those.
