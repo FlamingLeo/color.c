@@ -1,4 +1,4 @@
-#include <assert.h> // debug checks only, shouldn't be needed in prod.
+#include <assert.h> // debug checks only, shouldn't (tm) be needed in prod.
 #include <math.h>
 #include <stddef.h>
 #include "converter.h"
@@ -197,6 +197,9 @@ rgb_t hsv_to_rgb(const hsv_t *hsv) {
                     .g = (int)round((g + m) * 255),
                     .b = (int)round((b + m) * 255) };
 }
+
+// ansi colors and (sgr) indices (implementation / terminal defined! results may vary)
+// source: https://en.wikipedia.org/wiki/ANSI_escape_code#Colors
 
 rgb_t ansi256_idx_to_rgb(int idx) {
     assert(idx <= 255);

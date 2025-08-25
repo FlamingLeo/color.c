@@ -18,7 +18,7 @@
 #define DPLACES(_n, _d)              ((((_n) < 10) ? 1 : ((_n) < 100) ? 2 : 3) + (_d))
 
 // helper print functions
-static inline void print_usage(FILE* stream, const char *progname) { fprintf(stream, "usage: %s [-c <model>] [-m <map>] [-f <n>] [-w <n>] [-j] [-p] [-x] [-z] [-l [0|1]] [-h] <color>\nsee readme or help for a list of valid formats\n", progname); }
+static inline void print_usage(FILE* stream, const char *progname) { fprintf(stream, "usage: %s [-c <model>] [-f <n>] [-h] [-j] [-l [0|1]] [-m <map>] [-p] [-w <n>] [-W] [-x] <color>\nsee readme or help for a list of valid formats\n", progname); }
 static inline void print_help(const char* progname) {
     printf("color - a color printing (and conversion) tool for true color terminals\n\n");
     print_usage(stdout, progname);
@@ -36,9 +36,9 @@ static inline void print_help(const char* progname) {
            "  -p        : disable coloring text output (plain, for hard-to-read colors) (default: true)\n"
            "  -w <0..25>: choose the width of the left color square to display (h = w / 2) (default: 14)\n"
            "              0 disabled the color preview\n"
+           "  -W        : print colors in web format (css) (default: false)\n"
            "  -x        : use xkcd color names instead of css (default: false)\n"
-           "              this option must be set if you want to parse an xkcd color name\n"
-           "  -z        : print colors in web format (css) (default: false)\n");
+           "              this option must be set if you want to parse an xkcd color name\n");
     printf("\nvalid color formats (case-insensitive):\n"
            "  named: any valid named css / xkcd color (e.g. forestgreen, mediumblue...)\n"
            "  rgb:   rgb(r,g,b)\n"
@@ -87,16 +87,22 @@ int main(int argc, char **argv) {
     // i should probably use strtol here but the variables being modified aren't really critical
     int arg = 1;
     while ((argc > arg) && (argv[arg][0] == '-')) {
-        if (argv[arg][1] == 'z') webfmt = true;
-        if (argv[arg][1] == 'p') txtclr = false;
-        if (argv[arg][1] == 'j') json   = true;
-        if (argv[arg][1] == 'x') use_xkcd();
-        if (argv[arg][1] == 'c' && argc > arg + 1) conversion = argv[++arg];
-        if (argv[arg][1] == 'w' && argc > arg + 1) { cwidth  = atoi(argv[++arg]); cwidth  = CLAMP(cwidth , 0, 25); cwset = true; }
-        if (argv[arg][1] == 'm' && argc > arg + 1) { mapping = atoi(argv[++arg]); if (mapping != TC_NONE && mapping != TC_16 && mapping != TC_256 && mapping != TC_TRUECOLOR) ERROR_EXIT("invalid mapping (must be one of: 0, 16, 256, 16777216): %d", mapping); if (mapping > tmode) printf("warning: mapping %d (%s) might be unsupported by this terminal (color mode: %s)\n", mapping, tcolor_tostr(mapping), tcolor_tostr(tmode)); }
-        if (argv[arg][1] == 'f' && argc > arg + 1) { dplaces = atoi(argv[++arg]); dplaces = CLAMP(dplaces, 0, 5);  }
+        // special options that change main execution
         if (argv[arg][1] == 'h') { print_help(progname); return 0; }
         if (argv[arg][1] == 'l') { int lmode = 0; if(argc > arg + 1) lmode = atoi(argv[++arg]); if (lmode < 0 || lmode > 1) ERROR_EXIT("invalid list mode %d", lmode); else list_colors(lmode, mapping); return 0; }
+        
+        // flags
+        if (argv[arg][1] == 'j') json   = true;
+        if (argv[arg][1] == 'p') txtclr = false;
+        if (argv[arg][1] == 'W') webfmt = true;
+        if (argv[arg][1] == 'x') use_xkcd();
+
+        // options that require an argument
+        if (argv[arg][1] == 'c' && argc > arg + 1) conversion = argv[++arg];
+        if (argv[arg][1] == 'f' && argc > arg + 1) { dplaces = atoi(argv[++arg]); dplaces = CLAMP(dplaces, 0, 5);  }
+        if (argv[arg][1] == 'm' && argc > arg + 1) { mapping = atoi(argv[++arg]); if (mapping != TC_NONE && mapping != TC_16 && mapping != TC_256 && mapping != TC_TRUECOLOR) ERROR_EXIT("invalid mapping (must be one of: 0, 16, 256, 16777216): %d", mapping); if (mapping > tmode) printf("warning: mapping %d (%s) might be unsupported by this terminal (color mode: %s)\n", mapping, tcolor_tostr(mapping), tcolor_tostr(tmode)); }
+        if (argv[arg][1] == 'w' && argc > arg + 1) { cwidth  = atoi(argv[++arg]); cwidth  = CLAMP(cwidth , 0, 25); cwset = true; }
+        
         arg++;
     }
     if (!cwset && mapping != TC_TRUECOLOR) ++cwidth;
