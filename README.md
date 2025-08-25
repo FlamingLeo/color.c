@@ -3,7 +3,9 @@
 
 ![example run](img/example.png)
 
-`color.c` is a command-line tool designed for terminals with 24-bit color support which automatically parses the input color, displays it and shows a list of conversions to other common color models.
+`color.c` is a command-line tool designed for terminals with 24-bit color support[^1] which automatically parses the input color, displays it and shows a list of conversions to other common color models.
+
+[^1]: For non-truecolor terminals, colorless and 16-/256-color mappings are available. This program also respects the [`NO_COLOR`](https://no-color.org/) environment variable.
 
 ## Usage and Formats
 **Usage**: `color [-c <model>] [-f <n>] [-w <n>] [-j] [-p] [-x] [-z] [-l [0|1]] [-h] <color>`
