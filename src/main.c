@@ -88,20 +88,20 @@ int main(int argc, char **argv) {
     int arg = 1;
     while ((argc > arg) && (argv[arg][0] == '-')) {
         // special options that change main execution
-        if (argv[arg][1] == 'h') { print_help(progname); return 0; }
-        if (argv[arg][1] == 'l') { int lmode = 0; if(argc > arg + 1) lmode = atoi(argv[++arg]); if (lmode < 0 || lmode > 1) ERROR_EXIT("invalid list mode %d", lmode); else list_colors(lmode, mapping); return 0; }
+        if      (argv[arg][1] == 'h') { print_help(progname); return 0; }
+        else if (argv[arg][1] == 'l') { int lmode = 0; if(argc > arg + 1) lmode = atoi(argv[++arg]); if (lmode < 0 || lmode > 1) ERROR_EXIT("invalid list mode %d", lmode); else list_colors(lmode, mapping); return 0; }
         
         // flags
-        if (argv[arg][1] == 'j') json   = true;
-        if (argv[arg][1] == 'p') txtclr = false;
-        if (argv[arg][1] == 'W') webfmt = true;
-        if (argv[arg][1] == 'x') use_xkcd();
+        else if (argv[arg][1] == 'j') json   = true;
+        else if (argv[arg][1] == 'p') txtclr = false;
+        else if (argv[arg][1] == 'W') webfmt = true;
+        else if (argv[arg][1] == 'x') use_xkcd();
 
         // options that require an argument
-        if (argv[arg][1] == 'c' && argc > arg + 1) conversion = argv[++arg];
-        if (argv[arg][1] == 'f' && argc > arg + 1) { dplaces = atoi(argv[++arg]); dplaces = CLAMP(dplaces, 0, 5);  }
-        if (argv[arg][1] == 'm' && argc > arg + 1) { mapping = atoi(argv[++arg]); if (mapping != TC_NONE && mapping != TC_16 && mapping != TC_256 && mapping != TC_TRUECOLOR) ERROR_EXIT("invalid mapping (must be one of: 0, 16, 256, 16777216): %d", mapping); if (mapping > tmode) printf("warning: mapping %d (%s) might be unsupported by this terminal (color mode: %s)\n", mapping, tcolor_tostr(mapping), tcolor_tostr(tmode)); }
-        if (argv[arg][1] == 'w' && argc > arg + 1) { cwidth  = atoi(argv[++arg]); cwidth  = CLAMP(cwidth , 0, 25); cwset = true; }
+        else if (argv[arg][1] == 'c' && argc > arg + 1) conversion = argv[++arg];
+        else if (argv[arg][1] == 'f' && argc > arg + 1) { dplaces = atoi(argv[++arg]); dplaces = CLAMP(dplaces, 0, 5);  }
+        else if (argv[arg][1] == 'm' && argc > arg + 1) { mapping = atoi(argv[++arg]); if (mapping != TC_NONE && mapping != TC_16 && mapping != TC_256 && mapping != TC_TRUECOLOR) ERROR_EXIT("invalid mapping (must be one of: 0, 16, 256, 16777216): %d", mapping); if (mapping > tmode) printf("warning: mapping %d (%s) might be unsupported by this terminal (color mode: %s)\n", mapping, tcolor_tostr(mapping), tcolor_tostr(tmode)); }
+        else if (argv[arg][1] == 'w' && argc > arg + 1) { cwidth  = atoi(argv[++arg]); cwidth  = CLAMP(cwidth , 0, 25); cwset = true; }
         
         arg++;
     }
