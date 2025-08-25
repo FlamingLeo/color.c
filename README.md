@@ -10,15 +10,17 @@
 
 Following options are supported:
 ```text
--h        : show this help text and exit
 -c <model>: only show the conversion of the chosen color to the specified model, then exit
--l [0 | 1]: show a list of currently supported named colors and exit (default: 0)
-    - 0: human-readable format with sample, name and hex color
-    - 1: csv output with headers "name", "color", no sample
 -f <0..5> : choose the maximum amount of decimal places to print (default: 2)
--w <0..25>: choose the width of the left color square to display (h = w / 2) (default: 14)
+-h        : show this help text and exit
 -j        : print output in json format
+-l [0 | 1]: show a list of currently supported named colors and exit (default: 0)
+   - 0: human-readable format with sample, name and hex color
+   - 1: csv output with headers "name", "color", no sample
+-m <map>  : map terminal color to 0-, 16-, 256- or true color output (default: your terminal's color mode)
+            you may try and force unsupported terminals render higher color modes
 -p        : disable coloring text output (plain, for hard-to-read colors) (default: true)
+-w <0..25>: choose the width of the left color square to display (h = w / 2) (default: 14)
 -x        : use xkcd color names instead of css (default: false)
             this option must be set if you want to parse an xkcd color name
 -z        : print colors in web format (css) (default: false)

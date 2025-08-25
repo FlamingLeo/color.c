@@ -7,46 +7,13 @@
 #include "converter.h"
 #include "parser.h"
 #include "tables.h"
+#include "utility.h"
 
 #define COPY_OR_RETURN(_dst,_src) do { int n = snprintf(_dst, sizeof(_dst), "%s", _src); if (n < 0) return 0; if ((size_t)n >= sizeof(_dst)) return 0; } while (0)
 
 // internal name array selection
 static const named_t *names    = css_colors;
 static       size_t names_size = css_colors_size;
-
-// squared weighted distance between two rgb colors (components 0..255)
-static inline double weighted_dist2_rgb(const rgb_t *a, const rgb_t *b, double wr, double wg, double wb) {
-    double dr = (double)a->r - (double)b->r;
-    double dg = (double)a->g - (double)b->g;
-    double db = (double)a->b - (double)b->b;
-    return wr * dr * dr + wg * dg * dg + wb * db * db;
-}
-
-// find closest named color using weighted squared rgb distance
-// technically, doing it with rgb isn't the best (even weighted), but imo it's a fast and good enough way of doing it for this small sample size
-static named_t closest_named_weighted_rgb(const rgb_t *in) {
-    // source: https://www.compuphase.com/cmetric.htm
-    const double wr = 0.22216091748149788;
-    const double wg = 0.4288860259783791;
-    const double wb = 0.34895305654012304;
-
-    double best_score = 1.79769e+308; // DBL_MAX
-    size_t best_idx = 0;
-
-    for (size_t i = 0; i < names_size; ++i) {
-        rgb_t named = hex_to_rgb(names[i].hex);
-        double d = weighted_dist2_rgb(in, &named, wr, wg, wb);
-        if (d < best_score) {
-            best_score = d;
-            best_idx = i;
-        }
-    }
-
-    named_t closest = names[best_idx];
-    closest.diff = best_score;
-    return closest;
-}
-
 
 // helper function to normalize string in-place by removing whitespaces and converting upper- to lowercase
 // the result is guaranteed to be shorter or equal in length to the input
@@ -326,6 +293,29 @@ static inline int parse_hsv(char *s, color_t *out) {
 static parse_fn parsers[] = {parse_named, parse_hex, parse_rgb, parse_cmyk, parse_hsl, parse_hsv};
 
 // public api
+named_t closest_named_weighted_rgb(const rgb_t *in) {
+    // source: https://www.compuphase.com/cmetric.htm
+    const double wr = 0.22216091748149788;
+    const double wg = 0.4288860259783791;
+    const double wb = 0.34895305654012304;
+
+    double best_score = 1e300;
+    size_t best_idx   = 0;
+
+    for (size_t i = 0; i < names_size; ++i) {
+        rgb_t named = hex_to_rgb(names[i].hex);
+        double d = weighted_dist2_rgb(in, &named, wr, wg, wb);
+        if (d < best_score) {
+            best_score = d;
+            best_idx = i;
+        }
+    }
+
+    named_t closest = names[best_idx];
+    closest.diff = best_score;
+    return closest;
+}
+
 int parse_color(const char *in, color_t *out) {
     if (!in || !out) return 0;
 
@@ -354,11 +344,11 @@ int parse_color(const char *in, color_t *out) {
     return 0;
 }
 
-void list_colors(int l) {
-    if (!l)
+void list_colors(int l, color_cap_t mode) {
+    if (!l && mode == TC_TRUECOLOR)
         for (size_t i = 0; i < names_size; ++i) {
             rgb_t rgb = hex_to_rgb(names[i].hex);
-            printf("\033[48;2;%d;%d;%dm   "C_RESET " %-21s#%06x\n", rgb.r, rgb.g, rgb.b, names[i].name, names[i].hex);
+            printf("\033[48;2;%d;%d;%dm    \x1b[0m%-21s#%06x\n", rgb.r, rgb.g, rgb.b, names[i].name, names[i].hex);
         }
     else {
         printf("name,color\n");
@@ -370,6 +360,3 @@ void use_xkcd() {
     names      = xkcd_colors;
     names_size = xkcd_colors_size;
 }
-
-// TODO: alpha
-// TODO: lab space, CI76 or some better metric

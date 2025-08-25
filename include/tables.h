@@ -1,4 +1,7 @@
 // name tables for colors
+#ifndef TABLES_H
+#define TABLES_H
+
 #include "types.h"
 
 // all 148 named css colors
@@ -288,3 +291,5 @@ const named_t xkcd_colors[] = {
 };
 
 const size_t xkcd_colors_size = sizeof(xkcd_colors) / sizeof(xkcd_colors[0]);
+
+#endif

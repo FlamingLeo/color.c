@@ -5,13 +5,15 @@
 #define ZERO_THRESH 1e-12
 #define MIN(a,b) ((a) < (b) ? (a) : (b))
 #define MAX(a,b) ((a) > (b) ? (a) : (b))
+#define CLAMP(_n, _l, _r) ((_n) < (_l) ? (_l) : ((_n) > (_r) ? (_r) : (_n)))
 
 #define STR_BUFSIZE   128
 #define C_STR_BUFSIZE 20
 #define C_COL_BUFSIZE 64
 
 #define NULLSTR  "<NULL>"
-#define C_RESET  "\x1b[0m"
+
+// used in tests (assume color supported, cba disabling now)
 #define C_BOLD   "\x1b[1m"
 #define C_RED    "\x1b[31m"
 #define C_LRED   "\x1b[91m"
