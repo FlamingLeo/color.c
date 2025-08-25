@@ -14,6 +14,7 @@
 #define NULLSTR  "<NULL>"
 
 // used in tests (assume color supported, cba disabling now)
+#define C_RESET  "\x1b[0m"
 #define C_BOLD   "\x1b[1m"
 #define C_RED    "\x1b[31m"
 #define C_LRED   "\x1b[91m"
