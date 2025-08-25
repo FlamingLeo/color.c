@@ -72,4 +72,4 @@ Alternatively, you can just build the executable in the root directory of the re
 ## License (?)
 [Do whatever you want](https://en.wikipedia.org/wiki/WTFPL), I don't know, I'm not good at this legal stuff anyway.
 
-If you're not interested in the main functionality of this program, you might still be interested in the conversions to and from various color models in `src/converter.c`. Feel free to use those.
+If you're not interested in the main functionality of this program, you might still be interested in the conversions to and from various color models in `src/converter.c` or the named color tables in `include/tables.h` (or output in human-readable / CSV format using `[-x] -l [1]`). Feel free to use those.
