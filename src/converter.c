@@ -6,6 +6,10 @@
 #include "parser.h"
 #include "utility.h"
 
+#ifndef M_PI
+#define M_PI 3.14159265358979323846
+#endif
+
 // there's no checks for correct input in these functions (e.g. rgb in range [0,255] each)
 // we assume the parser has done a good job before filtering / modifying the values beforehand
 
@@ -20,6 +24,18 @@ static const rgb_t ansi16_rgb[16] = {
 // 6 cube levels used by xterm 256
 static const int cube_levels[6] = {0, 95, 135, 175, 215, 255};
 
+// helper: linearize sRGB channel 
+static inline double srgb_to_linear(double c) {
+    if (c <= 0.04045) return c / 12.92;
+    return pow((c + 0.055) / 1.055, 2.4);
+}
+
+// helper: gamma-encode linear channel
+static inline double linear_to_srgb(double c) {
+    if (c <= 0.0031308) return 12.92 * c;
+    return 1.055 * pow(c, 1.0 / 2.4) - 0.055;
+}
+
 // formulas mostly from rapidtables:
 //   https://www.rapidtables.com/convert/color/
 //
@@ -28,6 +44,7 @@ static const int cube_levels[6] = {0, 95, 135, 175, 215, 255};
 //   https://en.wikipedia.org/wiki/CMYK_color_model
 //   https://en.wikipedia.org/wiki/HSL_and_HSV
 //   https://en.wikipedia.org/wiki/Web_colors
+//   https://en.wikipedia.org/wiki/Oklab_color_space
 
 hex_t rgb_to_hex(const rgb_t *rgb) {
     assert(rgb);
@@ -58,7 +75,7 @@ cmyk_t rgb_to_cmyk(const rgb_t *rgb) {
         cmyk.m = (1.0 - g - cmyk.k) / denom;
         cmyk.y = (1.0 - b - cmyk.k) / denom;
 
-        // safety clamps
+        // safety clamps for minor floating point rounding errors
         cmyk.c = CLAMP(cmyk.c, 0.0, 1.0);
         cmyk.m = CLAMP(cmyk.m, 0.0, 1.0);
         cmyk.y = CLAMP(cmyk.y, 0.0, 1.0);
@@ -197,6 +214,123 @@ rgb_t hsv_to_rgb(const hsv_t *hsv) {
     return (rgb_t){ .r = (int)round((r + m) * 255),
                     .g = (int)round((g + m) * 255),
                     .b = (int)round((b + m) * 255) };
+}
+
+oklab_t rgb_to_oklab(const rgb_t *rgb) {
+    assert(rgb);
+
+    double r = rgb->r / 255.0;
+    double g = rgb->g / 255.0;
+    double b = rgb->b / 255.0;
+
+    double rlin = srgb_to_linear(r);
+    double glin = srgb_to_linear(g);
+    double blin = srgb_to_linear(b);
+
+    double l =  0.4122214708 * rlin + 0.5363325363 * glin + 0.0514459929 * blin;
+    double m =  0.2119034982 * rlin + 0.6806995451 * glin + 0.1073969566 * blin;
+    double s =  0.0883024619 * rlin + 0.2817188376 * glin + 0.6299787005 * blin;
+
+    double cl = cbrt(l);
+    double cm = cbrt(m);
+    double cs = cbrt(s);
+
+    oklab_t out;
+    out.L =  0.2104542553 * cl + 0.7936177850 * cm - 0.0040720468 * cs;
+    out.a =  1.9779984951 * cl - 2.4285922050 * cm + 0.4505937099 * cs;
+    out.b =  0.0259040371 * cl + 0.7827717662 * cm - 0.8086757660 * cs;
+
+    return out;
+}
+
+rgb_t oklab_to_rgb(const oklab_t *oklab) {
+    assert(oklab);
+
+    double cl = oklab->L + 0.3963377774 * oklab->a + 0.2158037573 * oklab->b;
+    double cm = oklab->L - 0.1055613458 * oklab->a - 0.0638541728 * oklab->b;
+    double cs = oklab->L - 0.0894841775 * oklab->a - 1.2914855480 * oklab->b;
+
+    double l = cl * cl * cl;
+    double m = cm * cm * cm;
+    double s = cs * cs * cs;
+
+    double rlin =  4.0767416621 * l - 3.3077115913 * m + 0.2309699292 * s;
+    double glin = -1.2684380046 * l + 2.6097574011 * m - 0.3413193965 * s;
+    double blin = -0.0041960863 * l - 0.7034186147 * m + 1.7076147010 * s;
+
+    double r = linear_to_srgb(rlin);
+    double g = linear_to_srgb(glin);
+    double b = linear_to_srgb(blin);
+
+    if (r < 0.0 || r > 1.0 || g < 0.0 || g > 1.0 || b < 0.0 || b > 1.0) fprintf(stderr, "warning: color out-of-gamut in rgb, clamping will be applied: %f, %f, %f\n", r, g, b);
+
+    if (!isfinite(r)) r = 0.0;
+    if (!isfinite(g)) g = 0.0;
+    if (!isfinite(b)) b = 0.0;
+
+    r = CLAMP(r, 0.0, 1.0);
+    g = CLAMP(g, 0.0, 1.0);
+    b = CLAMP(b, 0.0, 1.0);
+
+    return (rgb_t){ .r = (int)round(r * 255.0),
+                    .g = (int)round(g * 255.0),
+                    .b = (int)round(b * 255.0) };
+}
+
+oklch_t rgb_to_oklch(const rgb_t *rgb) {
+    oklab_t okl = rgb_to_oklab(rgb);
+    oklch_t ch;
+
+    ch.L = okl.L;
+    ch.c = sqrt(okl.a * okl.a + okl.b * okl.b);
+
+    double h = atan2(okl.b, okl.a) * 180.0 / M_PI;
+    if    (h < 0.0)    h += 360.0;
+    while (h >= 360.0) h -= 360.0;
+    ch.h = h;
+
+    return ch;
+}
+
+rgb_t oklch_to_rgb(const oklch_t *ch) {
+    assert(ch);
+
+    double hr = ch->h * M_PI / 180.0;
+
+    oklab_t lab;
+    lab.L = ch->L;
+    lab.a = ch->c * cos(hr);
+    lab.b = ch->c * sin(hr);
+
+    return oklab_to_rgb(&lab);
+}
+
+oklch_t oklab_to_oklch(const oklab_t *lab) {
+    assert(lab);
+
+    oklch_t ch;
+    ch.L = lab->L;
+    ch.c = sqrt(lab->a * lab->a + lab->b * lab->b);
+    
+    double h = atan2(lab->b, lab->a) * 180.0 / M_PI;
+    if    (h < 0.0)    h += 360.0;
+    while (h >= 360.0) h -= 360.0;
+    ch.h = h;
+
+    return ch;
+}
+
+oklab_t oklch_to_oklab(const oklch_t *ch) {
+    assert(ch);
+
+    double hr = ch->h * M_PI / 180.0;
+
+    oklab_t lab;
+    lab.L = ch->L;
+    lab.a = ch->c * cos(hr);
+    lab.b = ch->c * sin(hr);
+
+    return lab;
 }
 
 // ansi colors and (sgr) indices (implementation / terminal defined! results may vary)

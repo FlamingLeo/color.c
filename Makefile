@@ -1,4 +1,5 @@
 CC       := gcc
+
 STRIP    := strip --strip-all
 
 SRC_DIR  := src
@@ -7,13 +8,39 @@ OBJ_DIR  := obj
 
 CPPFLAGS := -I$(INC_DIR)
 
-CFLAGS  := -Wall -Wextra -Wno-missing-braces -Os \
-           -ffunction-sections -fdata-sections \
-           -fomit-frame-pointer \
-           -fno-unwind-tables -fno-asynchronous-unwind-tables \
-           -flto
+GIT_HASH   := $(shell git rev-parse --short HEAD 2>/dev/null || echo unknown)
+GIT_BRANCH := $(shell git rev-parse --abbrev-ref HEAD 2>/dev/null || echo unknown)
+COMPILE_TIME := $(shell date -u +"%Y-%m-%dT%H:%M:%SZ")
 
-LDFLAGS := -Wl,--gc-sections -Wl,-s -flto -lm
+VERSION_FLAGS := -DGIT_HASH=\"$(GIT_HASH)\" -DGIT_BRANCH=\"$(GIT_BRANCH)\" -DCOMPILE_TIME=\"$(COMPILE_TIME)\"
+
+CFLAGS_COMMON := -Wall -Wextra -Wno-missing-braces
+
+CFLAGS_RELEASE := -Os \
+                  -ffunction-sections -fdata-sections \
+                  -fomit-frame-pointer \
+                  -fno-unwind-tables -fno-asynchronous-unwind-tables \
+                  -flto
+
+CFLAGS_DEBUG := -g -O0 -Og \
+                 -fno-omit-frame-pointer \
+                 -fno-unwind-tables -fno-asynchronous-unwind-tables \
+                 -fno-lto -DDEBUG
+
+LDFLAGS_COMMON := -Wl,--gc-sections
+LDFLAGS_RELEASE := -Wl,-s -flto -lm
+LDFLAGS_DEBUG := -lm
+
+DEBUG ?= 0
+
+ifeq ($(DEBUG),1)
+CFLAGS := $(CFLAGS_COMMON) $(CFLAGS_DEBUG) $(VERSION_FLAGS)
+LDFLAGS := $(LDFLAGS_COMMON) $(LDFLAGS_DEBUG)
+STRIP := true
+else
+CFLAGS := $(CFLAGS_COMMON) $(CFLAGS_RELEASE) $(VERSION_FLAGS)
+LDFLAGS := $(LDFLAGS_COMMON) $(LDFLAGS_RELEASE)
+endif
 
 SRCS = $(wildcard $(SRC_DIR)/*.c)
 OBJS = $(patsubst $(SRC_DIR)/%.c, $(OBJ_DIR)/%.o, $(SRCS))
@@ -22,13 +49,6 @@ TARGET   := color
 TEST_SRC := tests/tests.c
 TEST_OBJ := $(OBJ_DIR)/tests.o
 TEST_BIN := $(TARGET)_test
-
-GIT_HASH   := $(shell git rev-parse --short HEAD 2>/dev/null || echo unknown)
-GIT_BRANCH := $(shell git rev-parse --abbrev-ref HEAD 2>/dev/null || echo unknown)
-COMPILE_TIME := $(shell date -u +"%Y-%m-%dT%H:%M:%SZ")
-
-VERSION_FLAGS := -DGIT_HASH=\"$(GIT_HASH)\" -DGIT_BRANCH=\"$(GIT_BRANCH)\" -DCOMPILE_TIME=\"$(COMPILE_TIME)\"
-CFLAGS += $(VERSION_FLAGS)
 
 all: $(TARGET)
 
@@ -60,7 +80,7 @@ targetname:
 clean:
 	rm -rf $(OBJ_DIR) $(TARGET) $(TEST_BIN)
 
-size: $(TARGET)
-	@command -v size >/dev/null 2>&1 && size $(TARGET) || echo "size tool not found"
+.PHONY: all targetname clean test debug
 
-.PHONY: all targetname clean test size
+debug:
+	@$(MAKE) DEBUG=1 all

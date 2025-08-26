@@ -86,6 +86,8 @@ void fmt_color_strings(const color_t *colorptr, bool webfmt, int dplaces,
                               char *cmyk,  size_t cmyk_s,
                               char *hsl,   size_t hsl_s,
                               char *hsv,   size_t hsv_s,
+                              char *oklab, size_t oklab_s,
+                              char *oklch, size_t oklch_s,
                               char *named, size_t named_s) {
     if (webfmt) {
         if (rgb && rgb_s)     snprintf(rgb,   rgb_s,   "rgb(%d,%d,%d)",                     colorptr->rgb.r, colorptr->rgb.g, colorptr->rgb.b);
@@ -93,6 +95,8 @@ void fmt_color_strings(const color_t *colorptr, bool webfmt, int dplaces,
         if (cmyk && cmyk_s)   snprintf(cmyk,  cmyk_s,  "cmyk(%.*f%%,%.*f%%,%.*f%%,%.*f%%)", dplaces, colorptr->cmyk.c * 100.0, dplaces, colorptr->cmyk.m * 100.0, dplaces, colorptr->cmyk.y * 100.0, dplaces, colorptr->cmyk.k * 100.0);
         if (hsl && hsl_s)     snprintf(hsl,   hsl_s,   "hsl(%.*f,%.*f%%,%.*f%%)",           dplaces, colorptr->hsl.h, dplaces, colorptr->hsl.sat * 100.0, dplaces, colorptr->hsl.l * 100.0);
         if (hsv && hsv_s)     snprintf(hsv,   hsv_s,   "hsv(%.*f,%.*f%%,%.*f%%)",           dplaces, colorptr->hsv.h, dplaces, colorptr->hsv.sat * 100.0, dplaces, colorptr->hsv.v * 100.0);
+        if (oklab && oklab_s) snprintf(oklab, oklab_s, "oklab(%.*f%%,%.*f,%.*f)",           dplaces, colorptr->oklab.L * 100.0, dplaces, colorptr->oklab.a, dplaces, colorptr->oklab.b);
+        if (oklch && oklch_s) snprintf(oklch, oklch_s, "oklch(%.*f%%,%.*f%%,%.*f)",         dplaces, colorptr->oklch.L * 100.0, dplaces, colorptr->oklch.c * 100.0, dplaces, colorptr->oklch.h);
         if (named && named_s) snprintf(named, named_s, "%s (#%06x) (dist² %.*f)",           colorptr->named.name, colorptr->named.hex, dplaces, colorptr->named.diff);
     } else {
         if (rgb && rgb_s)     snprintf(rgb,   rgb_s,   "%d,%d,%d",                          colorptr->rgb.r, colorptr->rgb.g, colorptr->rgb.b);
@@ -100,9 +104,12 @@ void fmt_color_strings(const color_t *colorptr, bool webfmt, int dplaces,
         if (cmyk && cmyk_s)   snprintf(cmyk,  cmyk_s,  "%.*f%%,%.*f%%,%.*f%%,%.*f%%",       dplaces, colorptr->cmyk.c * 100.0, dplaces, colorptr->cmyk.m * 100.0, dplaces, colorptr->cmyk.y * 100.0, dplaces, colorptr->cmyk.k * 100.0);
         if (hsl && hsl_s)     snprintf(hsl,   hsl_s,   "%.*f,%.*f%%,%.*f%%",                dplaces, colorptr->hsl.h, dplaces, colorptr->hsl.sat * 100.0, dplaces, colorptr->hsl.l * 100.0);
         if (hsv && hsv_s)     snprintf(hsv,   hsv_s,   "%.*f,%.*f%%,%.*f%%",                dplaces, colorptr->hsv.h, dplaces, colorptr->hsv.sat * 100.0, dplaces, colorptr->hsv.v * 100.0);
+        if (oklab && oklab_s) snprintf(oklab, oklab_s, "%.*f%%,%.*f,%.*f",                   dplaces, colorptr->oklab.L * 100.0, dplaces, colorptr->oklab.a, dplaces, colorptr->oklab.b);
+        if (oklch && oklch_s) snprintf(oklch, oklch_s, "%.*f%%,%.*f%%,%.*f",               dplaces, colorptr->oklch.L * 100.0, dplaces, colorptr->oklch.c * 100.0, dplaces, colorptr->oklch.h);
         if (named && named_s) snprintf(named, named_s, "%s (%06x) (dist² %.*f)",            colorptr->named.name, colorptr->named.hex, dplaces, colorptr->named.diff);
     }
 }
+
 
 int map_rgb_to_sgr_strings(color_cap_t mapping, const rgb_t *rgb_in, char *bgbufptr, size_t bgbufsz, char *fgbufptr, size_t fgbufsz) {
     if (mapping == TC_NONE)      {                                       if (bgbufsz > 0)   bgbufptr[0] = '\0';                                               if (fgbufsz > 0)   fgbufptr[0] = '\0';                                               return -1;  }

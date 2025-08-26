@@ -35,6 +35,8 @@ typedef struct { double c, m, y, k; }                        cmyk_t;
 typedef struct { double h, sat, l; }                         hsl_t;
 typedef struct { double h, sat, v; }                         hsv_t;
 typedef unsigned                                             hex_t;
+typedef struct { double L; double a; double b; }             oklab_t;
+typedef struct { double L; double c; double h; }             oklch_t;
 typedef struct { const char *name; hex_t hex; double diff; } named_t;
 
 // color struct including all color models
@@ -44,6 +46,8 @@ typedef struct {
     cmyk_t  cmyk;
     hsl_t   hsl;
     hsv_t   hsv;
+    oklab_t oklab;
+    oklch_t oklch;
     named_t named;
 } color_t;
 

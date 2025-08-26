@@ -59,6 +59,8 @@ static inline int parse_named(char *s, color_t *out) {
             out->cmyk  = rgb_to_cmyk(&out->rgb);
             out->hsl   = rgb_to_hsl(&out->rgb);
             out->hsv   = rgb_to_hsv(&out->rgb);
+            out->oklch = rgb_to_oklch(&out->rgb);
+            out->oklab = oklch_to_oklab(&out->oklch);
             out->named = closest_named_weighted_rgb(&out->rgb);
             return 1;
         }
@@ -73,6 +75,8 @@ static inline int parse_named(char *s, color_t *out) {
             out->cmyk  = rgb_to_cmyk(&out->rgb);
             out->hsl   = rgb_to_hsl(&out->rgb);
             out->hsv   = rgb_to_hsv(&out->rgb);
+            out->oklch = rgb_to_oklch(&out->rgb);
+            out->oklab = oklch_to_oklab(&out->oklch);
             out->named = closest_named_weighted_rgb(&out->rgb);
             return 1;
         }
@@ -89,7 +93,7 @@ static inline int parse_hex(char *s, color_t *out) {
     if (strncmp(p, "hex(", 4) == 0) {
         p += 4;
         size_t L = strlen(p);
-        if (L && p[L - 1] == ')') p[L - 1] = 0;
+        if (L && p[L - 1] == ')') p[L - 1] = '\0';
         else return 0;
     }
 
@@ -121,6 +125,8 @@ static inline int parse_hex(char *s, color_t *out) {
     out->cmyk  = rgb_to_cmyk(&out->rgb);
     out->hsl   = rgb_to_hsl(&out->rgb);
     out->hsv   = rgb_to_hsv(&out->rgb);
+    out->oklch = rgb_to_oklch(&out->rgb);
+    out->oklab = oklch_to_oklab(&out->oklch);
     out->named = closest_named_weighted_rgb(&out->rgb);
     return 1;
 }
@@ -136,7 +142,7 @@ static inline int parse_rgb(char *s, color_t *out) {
     if (strncmp(p, "rgb(", 4) == 0) {
         p += 4;
         size_t L = strlen(p);
-        if (L && p[L - 1] == ')') p[L - 1] = 0; else return 0;
+        if (L && p[L - 1] == ')') p[L - 1] = '\0'; else return 0;
     }
 
     int    a,  b,  c;
@@ -150,11 +156,14 @@ static inline int parse_rgb(char *s, color_t *out) {
             out->cmyk  = rgb_to_cmyk(&out->rgb);
             out->hsl   = rgb_to_hsl(&out->rgb);
             out->hsv   = rgb_to_hsv(&out->rgb);
+            out->oklch = rgb_to_oklch(&out->rgb);
+            out->oklab = oklch_to_oklab(&out->oklch);
             out->named = closest_named_weighted_rgb(&out->rgb);
             return 1;
         }
     } else if (sscanf(p, "%lf,%lf,%lf%n", &fa, &fb, &fc, &n) == 3 && p[n] == '\0') {
         // floats (0.0,0.0,0.0 - 1.0,1.0,1.0)
+        if (!isfinite(fa) || !isfinite(fb) || !isfinite(fc)) return 0; // should not happen
         if (fa >= 0.0 && fa <= 1.0 && fb >= 0.0 && fb <= 1.0 && fc >= 0.0 && fc <= 1.0) {
             out->rgb = (rgb_t){ .r = (int)round(fa * 255.0), 
                                 .g = (int)round(fb * 255.0), 
@@ -163,6 +172,8 @@ static inline int parse_rgb(char *s, color_t *out) {
             out->cmyk  = rgb_to_cmyk(&out->rgb);
             out->hsl   = rgb_to_hsl(&out->rgb);
             out->hsv   = rgb_to_hsv(&out->rgb);
+            out->oklch = rgb_to_oklch(&out->rgb);
+            out->oklab = oklch_to_oklab(&out->oklch);
             out->named = closest_named_weighted_rgb(&out->rgb);
             return 1;
         }
@@ -177,13 +188,14 @@ static inline int parse_cmyk(char *s, color_t *out) {
     if (strncmp(p, "cmyk(", 5) == 0) {
         p += 5;
         size_t L = strlen(p);
-        if (L && p[L - 1] == ')') p[L - 1] = 0; else return 0;
+        if (L && p[L - 1] == ')') p[L - 1] = '\0'; else return 0;
     }
 
     double c, m, y, k;
     int    n = 0;
     if (sscanf(p, "%lf%%,%lf%%,%lf%%,%lf%%%n", &c, &m, &y, &k, &n) == 4 && p[n] == '\0') {
         // percent form: divide by 100 to get normalized value
+        if (!isfinite(c) || !isfinite(m) || !isfinite(y) || !isfinite(k)) return 0;
         if (c > 100.0 || m > 100.0 || y > 100.0 || k > 100.0 || 
             c <   0.0 || m <   0.0 || y <   0.0 || k <   0.0) return 0;
 
@@ -192,7 +204,8 @@ static inline int parse_cmyk(char *s, color_t *out) {
         y /= 100.0;
         k /= 100.0;
     } else if (sscanf(p, "%lf,%lf,%lf,%lf%n", &c, &m, &y, &k, &n) == 4 && p[n] == '\0') {
-        // no explicit %: assume any number in [0,1] is already normalized, otherwise assume missing % (convenience)
+        // no explicit %: assume any number in [0,1] is already normalized, otherwise assume missing %
+        if (!isfinite(c) || !isfinite(m) || !isfinite(y) || !isfinite(k)) return 0;
         if (c > 100.0 || m > 100.0 || y > 100.0 || k > 100.0 || 
             c <   0.0 || m <   0.0 || y <   0.0 || k <   0.0) return 0;
 
@@ -207,6 +220,8 @@ static inline int parse_cmyk(char *s, color_t *out) {
     out->hex   = rgb_to_hex(&out->rgb);
     out->hsl   = rgb_to_hsl(&out->rgb);
     out->hsv   = rgb_to_hsv(&out->rgb);
+    out->oklch = rgb_to_oklch(&out->rgb);
+    out->oklab = oklch_to_oklab(&out->oklch);
     out->named = closest_named_weighted_rgb(&out->rgb);
     return 1;
 }
@@ -217,21 +232,23 @@ static inline int parse_hsl(char *s, color_t *out)  {
     // quick reject inputs without necessary prefix
     if (strncmp(s, "hsl(", 4) != 0) return 0;
 
-    char *p = s + 4;
+    char  *p = s + 4;
     size_t L = strlen(p);
-    if (L && p[L - 1] == ')') p[L - 1] = 0; else return 0;
+    if (L && p[L - 1] == ')') p[L - 1] = '\0'; else return 0;
 
     double h, sat, l;
     int    n = 0;
     if (sscanf(p, "%lf,%lf%%,%lf%%%n", &h, &sat, &l, &n) == 3 && p[n] == '\0') {
         // percent form: divide by 100 to get normalized value
+        if (!isfinite(h) || !isfinite(sat) || !isfinite(l)) return 0;
         if (sat > 100.0 || l > 100.0 || 
             sat <   0.0 || l <   0.0) return 0;
 
         sat /= 100.0;
         l   /= 100.0;
     } else if (sscanf(p, "%lf,%lf,%lf%n", &h, &sat, &l, &n) == 3 && p[n] == '\0') {
-        // no explicit %: assume any number in [0,1] is already normalized, otherwise assume missing % (convenience)
+        // no explicit %: assume any number in [0,1] is already normalized, otherwise assume missing %
+        if(!isfinite(h) || !isfinite(sat) || !isfinite(l)) return 0;
         if (sat > 100.0 || l > 100.0 || 
             sat <   0.0 || l <   0.0) return 0;
 
@@ -239,11 +256,17 @@ static inline int parse_hsl(char *s, color_t *out)  {
         if (l > 1)   l   /= 100.0;
     } else return 0;
 
-    out->hsl   = (hsl_t){ .h = fmod(h, 360.0), .sat = sat, .l = l };
+    double hp = fmod(h, 360.0);
+    if (!isfinite(hp)) return 0;
+    if (hp < 0.0) hp += 360.0;
+
+    out->hsl   = (hsl_t){ .h = hp, .sat = sat, .l = l };
     out->rgb   = hsl_to_rgb(&out->hsl);
     out->hex   = rgb_to_hex(&out->rgb);
     out->cmyk  = rgb_to_cmyk(&out->rgb);
     out->hsv   = rgb_to_hsv(&out->rgb);
+    out->oklch = rgb_to_oklch(&out->rgb);
+    out->oklab = oklch_to_oklab(&out->oklch);
     out->named = closest_named_weighted_rgb(&out->rgb);
     return 1;
 }
@@ -254,12 +277,13 @@ static inline int parse_hsv(char *s, color_t *out) {
     double h, sat, v;
     int    n = 0;
     if (strncmp(s, "hsv(", 4) == 0) {
-        char *p = s + 4;
+        char  *p = s + 4;
         size_t L = strlen(p);
-        if (L && p[L-1] == ')') p[L-1] = 0; else return 0;
+        if (L && p[L-1] == ')') p[L - 1] = '\0'; else return 0;
 
         if (sscanf(p, "%lf,%lf%%,%lf%%%n", &h, &sat, &v, &n) == 3 && p[n] == '\0') {
             // try percent form inside prefix
+            if (!isfinite(h) || !isfinite(sat) || !isfinite(v)) return 0;
             if (sat > 100.0 || v > 100.0 ||
                 sat <   0.0 || v <   0.0) return 0;
 
@@ -268,6 +292,7 @@ static inline int parse_hsv(char *s, color_t *out) {
         }
         else if (sscanf(p, "%lf,%lf,%lf%n", &h, &sat, &v, &n) == 3 && p[n] == '\0') {
             // otherwise, do the same as in the previous parsers...
+            if (!isfinite(h) || !isfinite(sat) || !isfinite(v)) return 0;
             if (sat > 100.0 || v > 100.0 ||
                 sat <   0.0 || v <   0.0) return 0;
             
@@ -277,6 +302,7 @@ static inline int parse_hsv(char *s, color_t *out) {
     } else {
         // bare form: require the percent-sign style h,s%,v%
         if (sscanf(s, "%lf,%lf%%,%lf%%%n", &h, &sat, &v, &n) == 3 && s[n] == '\0') {
+            if (!isfinite(h) || !isfinite(sat) || !isfinite(v)) return 0;
             if (sat > 100.0 || v > 100.0 ||
                 sat <   0.0 || v <   0.0) return 0;
 
@@ -286,17 +312,118 @@ static inline int parse_hsv(char *s, color_t *out) {
         else return 0; // bare non-percent triples are NOT accepted
     }
 
-    out->hsv   = (hsv_t){ .h = fmod(h, 360.0), .sat = sat, .v = v };
+    double hp = fmod(h, 360.0);
+    if (!isfinite(hp)) return 0;
+    if (hp < 0.0) hp += 360.0;
+
+    out->hsv   = (hsv_t){ .h = hp, .sat = sat, .v = v };
     out->rgb   = hsv_to_rgb(&out->hsv);
     out->hex   = rgb_to_hex(&out->rgb);
     out->cmyk  = rgb_to_cmyk(&out->rgb);
     out->hsl   = rgb_to_hsl(&out->rgb);
+    out->oklch = rgb_to_oklch(&out->rgb);
+    out->oklab = oklch_to_oklab(&out->oklch);
+    out->named = closest_named_weighted_rgb(&out->rgb);
+    return 1;
+}
+
+// OKLAB: "oklab(L,a,b)" with optional % on any component
+static inline int parse_oklab(char *s, color_t *out) {
+    if (strncmp(s, "oklab(", 6) != 0) return 0;
+
+    char  *p  = s + 6;
+    size_t Ls = strlen(p);
+    if (Ls == 0 || p[Ls - 1] != ')') return 0;
+    p[Ls - 1] = '\0';
+
+    double L = 0.0, a = 0.0, b = 0.0;
+    int    n = 0;
+
+    if      (sscanf(p, "%lf%%,%lf%%,%lf%%%n", &L, &a, &b, &n) == 3 && p[n] == '\0') {              L /= 100.0; a /= 100.0; b /= 100.0; }
+    else if (sscanf(p, "%lf%%,%lf%%,%lf%n",   &L, &a, &b, &n) == 3 && p[n] == '\0') {              L /= 100.0; a /= 100.0;             }
+    else if (sscanf(p, "%lf%%,%lf,%lf%%%n",   &L, &a, &b, &n) == 3 && p[n] == '\0') {              L /= 100.0;             b /= 100.0; }
+    else if (sscanf(p, "%lf,%lf%%,%lf%%%n",   &L, &a, &b, &n) == 3 && p[n] == '\0') { if (L > 1.0) L /= 100.0; a /= 100.0; b /= 100.0; }
+    else if (sscanf(p, "%lf%%,%lf,%lf%n",     &L, &a, &b, &n) == 3 && p[n] == '\0') {              L /= 100.0;                         }
+    else if (sscanf(p, "%lf,%lf%%,%lf%n",     &L, &a, &b, &n) == 3 && p[n] == '\0') { if (L > 1.0) L /= 100.0; a /= 100.0;             }
+    else if (sscanf(p, "%lf,%lf,%lf%%%n",     &L, &a, &b, &n) == 3 && p[n] == '\0') { if (L > 1.0) L /= 100.0; b /= 100.0; }
+    else if (sscanf(p, "%lf,%lf,%lf%n",       &L, &a, &b, &n) == 3 && p[n] == '\0') { if (L > 1.0) L /= 100.0; }
+    else    return 0;
+
+    if (!isfinite(L) || !isfinite(a) || !isfinite(b)) return 0;
+
+    if (fabs(a) > 1.0) a /= 100.0;
+    if (fabs(b) > 1.0) b /= 100.0;
+
+    if (L < 0.0 || L > 1.0) return 0;
+
+    out->oklab = (oklab_t){ .L = L, .a = a, .b = b };
+    out->oklch = oklab_to_oklch(&out->oklab);
+    out->rgb   = oklab_to_rgb(&out->oklab);
+    out->hex   = rgb_to_hex(&out->rgb);
+    out->cmyk  = rgb_to_cmyk(&out->rgb);
+    out->hsl   = rgb_to_hsl(&out->rgb);
+    out->hsv   = rgb_to_hsv(&out->rgb);
+    out->named = closest_named_weighted_rgb(&out->rgb);
+    return 1;
+}
+
+
+// OKLCH: "oklch(L,c,h)" or bare "L%,c,h", "L%,c%,h"
+// bare requires (!) '%' after L to differentiate
+static inline int parse_oklch(char *s, color_t *out) {
+    char *p = NULL;
+    bool bare = false;
+
+    if (strncmp(s, "oklch(", 6) == 0) {
+        p = s + 6;
+        size_t Ls = strlen(p);
+        if (Ls == 0 || p[Ls - 1] != ')') return 0;
+        p[Ls - 1] = '\0';
+    } else { p = s; bare = true; }
+
+    double L = 0.0, c = 0.0, h = 0.0;
+    int    n = 0;
+
+    if (!bare) {
+        if      (sscanf(p, "%lf%%,%lf%%,%lf%n", &L, &c, &h, &n) == 3 && p[n] == '\0') {              L /= 100.0; c /= 100.0; }
+        else if (sscanf(p, "%lf%%,%lf,%lf%n",   &L, &c, &h, &n) == 3 && p[n] == '\0') {              L /= 100.0; }
+        else if (sscanf(p, "%lf,%lf%%,%lf%n",   &L, &c, &h, &n) == 3 && p[n] == '\0') { if (L > 1.0) L /= 100.0; c /= 100.0; }
+        else if (sscanf(p, "%lf,%lf,%lf%n",     &L, &c, &h, &n) == 3 && p[n] == '\0') { if (L > 1.0) L /= 100.0; }
+        else return 0;
+    } else {
+        if      (sscanf(p, "%lf%%,%lf%%,%lf%n", &L, &c, &h, &n) == 3 && p[n] == '\0') { L /= 100.0; c /= 100.0; }
+        else if (sscanf(p, "%lf%%,%lf,%lf%n",   &L, &c, &h, &n) == 3 && p[n] == '\0') { L /= 100.0; }
+        else return 0;
+    }
+
+    if (!isfinite(L) || !isfinite(c) || !isfinite(h)) return 0;
+
+    if (c > 1.0) c /= 100.0;
+
+    if (L < 0.0 || L > 1.0) return 0;
+    if (c < 0.0)            return 0;
+
+    double hp = fmod(h, 360.0);
+    if (!isfinite(hp)) return 0;
+    if (hp < 0.0) hp += 360.0;
+
+    out->oklch = (oklch_t){ .L = L, .c = c, .h = hp };
+    out->oklab = oklch_to_oklab(&out->oklch);
+    out->rgb   = oklch_to_rgb(&out->oklch);
+    out->hex   = rgb_to_hex(&out->rgb);
+    out->cmyk  = rgb_to_cmyk(&out->rgb);
+    out->hsl   = rgb_to_hsl(&out->rgb);
+    out->hsv   = rgb_to_hsv(&out->rgb);
     out->named = closest_named_weighted_rgb(&out->rgb);
     return 1;
 }
 
 // list of parser functions to iterate through
-static parse_fn parsers[] = {parse_named, parse_hex, parse_rgb, parse_cmyk, parse_hsl, parse_hsv};
+static parse_fn parsers[] = {
+    parse_named, parse_hex,  parse_rgb, 
+    parse_cmyk,  parse_hsl,  parse_hsv,
+    parse_oklab, parse_oklch
+};
 
 // public api
 named_t closest_named_weighted_rgb(const rgb_t *in) {

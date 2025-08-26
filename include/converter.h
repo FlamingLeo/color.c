@@ -20,6 +20,13 @@ rgb_t cmyk_to_rgb(const cmyk_t *cmyk);
 rgb_t hsl_to_rgb(const hsl_t *hsl);
 rgb_t hsv_to_rgb(const hsv_t *hsv);
 
+oklab_t rgb_to_oklab(const rgb_t *rgb);
+oklch_t rgb_to_oklch(const rgb_t *rgb);
+rgb_t oklab_to_rgb(const oklab_t *oklab);
+rgb_t oklch_to_rgb(const oklch_t *ch);
+oklch_t oklab_to_oklch(const oklab_t *lab);
+oklab_t oklch_to_oklab(const oklch_t *ch);
+
 rgb_t ansi256_idx_to_rgb(int idx);
 rgb_t ansi16_idx_to_rgb(int idx);
 int rgb_to_ansi256_idx(const rgb_t *rgb);

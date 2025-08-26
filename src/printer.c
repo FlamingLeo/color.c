@@ -21,7 +21,7 @@ void print_help(const char* progname) {
            "  -m <map>  : map terminal color to \"0\", \"16\", \"256\" or \"truecolor\" output (default: your terminal's color mode)\n"
            "              you may try and force unsupported terminals render higher color modes\n"
            "  -p        : disable coloring text output (plain, for hard-to-read colors) (default: true)\n"
-           "  -w <0..25>: choose the width of the left color square to display (h = w / 2) (default: 14)\n"
+           "  -w <0..25>: choose the width of the left color square to display (h = w / 2) (default: 18)\n"
            "              0 disabled the color preview\n"
            "  -W        : print colors in web format (css) (default: false)\n"
            "  -x        : use xkcd color names instead of css (default: false)\n"
@@ -43,7 +43,13 @@ void print_help(const char* progname) {
            "         hsl(h,s,l)\n"
            "  hsv:   hsv(h,s%%,v%%)\n"
            "         hsv(h,s,v)\n"
-           "         h,s%%,v%%\n");
+           "         h,s%%,v%%\n"
+           "  oklab: oklab(L,a,b)\n"
+           "         optional percent sign for any component\n"
+           "  oklch: oklch(L,c,h)\n"
+           "         L%%,c,h\n"
+           "         L%%,c%%,h\n"
+           "         optional percent sign for L or c for oklch(...)\n");
 #if defined(GIT_HASH) && defined(GIT_BRANCH) && defined(COMPILE_TIME)
     printf("\nhash:   " GIT_HASH
            "\nbranch: " GIT_BRANCH
@@ -80,18 +86,24 @@ bool print_color(const color_t *colorptr, const prog_opts_t *opts,   bool is_mai
                                          fgbufptr, C_STR_BUFSIZE);
 
     // prepare textual representations (declared but not necessarily filled)
-    char rgb[C_COL_BUFSIZE], hex[C_COL_BUFSIZE], cmyk[C_COL_BUFSIZE], hsl[C_COL_BUFSIZE], hsv[C_COL_BUFSIZE], named[STR_BUFSIZE];
+    char rgb[C_COL_BUFSIZE],   hex[C_COL_BUFSIZE],   cmyk[C_COL_BUFSIZE],
+         hsl[C_COL_BUFSIZE],   hsv[C_COL_BUFSIZE],
+         oklab[C_COL_BUFSIZE], oklch[C_COL_BUFSIZE],
+         named[STR_BUFSIZE];
+
 
     // populate only needed buffers in conversion-only mode
     // json mode: buffers not needed
     if (opts->conversion) {
         if (!opts->json) {
-            if      (strcasecmp_own(opts->conversion, "rgb"))   { fmt_color_strings(colorptr, opts->webfmt, opts->dplaces, rgb, sizeof(rgb), NULL, 0, NULL, 0, NULL, 0, NULL, 0, NULL, 0);     printf("%s\n", rgb); }
-            else if (strcasecmp_own(opts->conversion, "hex"))   { fmt_color_strings(colorptr, opts->webfmt, opts->dplaces, NULL, 0, hex, sizeof(hex), NULL, 0, NULL, 0, NULL, 0, NULL, 0);     printf("%s\n", hex); }
-            else if (strcasecmp_own(opts->conversion, "cmyk"))  { fmt_color_strings(colorptr, opts->webfmt, opts->dplaces, NULL, 0, NULL, 0, cmyk, sizeof(cmyk), NULL, 0, NULL, 0, NULL, 0);   printf("%s\n", cmyk); } 
-            else if (strcasecmp_own(opts->conversion, "hsl"))   { fmt_color_strings(colorptr, opts->webfmt, opts->dplaces, NULL, 0, NULL, 0, NULL, 0, hsl, sizeof(hsl), NULL, 0, NULL, 0);     printf("%s\n", hsl); }
-            else if (strcasecmp_own(opts->conversion, "hsv"))   { fmt_color_strings(colorptr, opts->webfmt, opts->dplaces, NULL, 0, NULL, 0, NULL, 0, NULL, 0, hsv, sizeof(hsv), NULL, 0);     printf("%s\n", hsv); }
-            else if (strcasecmp_own(opts->conversion, "named")) { fmt_color_strings(colorptr, opts->webfmt, opts->dplaces, NULL, 0, NULL, 0, NULL, 0, NULL, 0, NULL, 0, named, sizeof(named)); printf("%s\n", named); }
+            if      (strcasecmp_own(opts->conversion, "rgb"))   { fmt_color_strings(colorptr, opts->webfmt, opts->dplaces, rgb, sizeof(rgb), NULL, 0, NULL, 0, NULL, 0, NULL, 0, NULL, 0, NULL, 0, NULL, 0);     printf("%s\n", rgb); }
+            else if (strcasecmp_own(opts->conversion, "hex"))   { fmt_color_strings(colorptr, opts->webfmt, opts->dplaces, NULL, 0, hex, sizeof(hex), NULL, 0, NULL, 0, NULL, 0, NULL, 0, NULL, 0, NULL, 0);     printf("%s\n", hex); }
+            else if (strcasecmp_own(opts->conversion, "cmyk"))  { fmt_color_strings(colorptr, opts->webfmt, opts->dplaces, NULL, 0, NULL, 0, cmyk, sizeof(cmyk), NULL, 0, NULL, 0, NULL, 0, NULL, 0, NULL, 0);   printf("%s\n", cmyk); }
+            else if (strcasecmp_own(opts->conversion, "hsl"))   { fmt_color_strings(colorptr, opts->webfmt, opts->dplaces, NULL, 0, NULL, 0, NULL, 0, hsl, sizeof(hsl), NULL, 0, NULL, 0, NULL, 0, NULL, 0);     printf("%s\n", hsl); }
+            else if (strcasecmp_own(opts->conversion, "hsv"))   { fmt_color_strings(colorptr, opts->webfmt, opts->dplaces, NULL, 0, NULL, 0, NULL, 0, NULL, 0, hsv, sizeof(hsv), NULL, 0, NULL, 0, NULL, 0);     printf("%s\n", hsv); }
+            else if (strcasecmp_own(opts->conversion, "oklab")) { fmt_color_strings(colorptr, opts->webfmt, opts->dplaces, NULL, 0, NULL, 0, NULL, 0, NULL, 0, NULL, 0, oklab, sizeof(oklab), NULL, 0, NULL, 0); printf("%s\n", oklab); }
+            else if (strcasecmp_own(opts->conversion, "oklch")) { fmt_color_strings(colorptr, opts->webfmt, opts->dplaces, NULL, 0, NULL, 0, NULL, 0, NULL, 0, NULL, 0, NULL, 0, oklch, sizeof(oklch), NULL, 0); printf("%s\n", oklch); }
+            else if (strcasecmp_own(opts->conversion, "named")) { fmt_color_strings(colorptr, opts->webfmt, opts->dplaces, NULL, 0, NULL, 0, NULL, 0, NULL, 0, NULL, 0, NULL, 0, NULL, 0, named, sizeof(named)); printf("%s\n", named); }
         } else {
             printf("  \"%s\" : { ", (is_main ? "main" : "distance"));
             if      (strcasecmp_own(opts->conversion, "rgb"))   printf("\"rgb\": { \"r\": %d, \"g\": %d, \"b\": %d }",                            colorptr->rgb.r, colorptr->rgb.g, colorptr->rgb.b);
@@ -99,6 +111,8 @@ bool print_color(const color_t *colorptr, const prog_opts_t *opts,   bool is_mai
             else if (strcasecmp_own(opts->conversion, "cmyk"))  printf("\"cmyk\": { \"c\": %.*f, \"m\": %.*f, \"y\": %.*f, \"k\": %.*f }",        opts->dplaces, colorptr->cmyk.c, opts->dplaces, colorptr->cmyk.m, opts->dplaces, colorptr->cmyk.y, opts->dplaces, colorptr->cmyk.k);
             else if (strcasecmp_own(opts->conversion, "hsl"))   printf("\"hsl\": { \"h\": %.*f, \"s\": %.*f, \"l\": %.*f }",                      opts->dplaces, colorptr->hsl.h, opts->dplaces, colorptr->hsl.sat, opts->dplaces, colorptr->hsl.l);
             else if (strcasecmp_own(opts->conversion, "hsv"))   printf("\"hsv\": { \"h\": %.*f, \"s\": %.*f, \"v\": %.*f }",                      opts->dplaces, colorptr->hsv.h, opts->dplaces, colorptr->hsv.sat, opts->dplaces, colorptr->hsv.v);
+            else if (strcasecmp_own(opts->conversion, "oklab")) printf("\"oklab\": { \"L\": %.*f, \"a\": %.*f, \"b\": %.*f }",                    opts->dplaces, colorptr->oklab.L, opts->dplaces, colorptr->oklab.a, opts->dplaces, colorptr->oklab.b);
+            else if (strcasecmp_own(opts->conversion, "oklch")) printf("\"oklch\": { \"L\": %.*f, \"c\": %.*f, \"h\": %.*f }",                    opts->dplaces, colorptr->oklch.L, opts->dplaces, colorptr->oklch.c, opts->dplaces, colorptr->oklch.h);
             else if (strcasecmp_own(opts->conversion, "named")) printf("\"named\": { \"name\": \"%s\", \"hex\": \"#%06x\", \"wsqrdist\": %.*f }", colorptr->named.name, colorptr->named.hex, opts->dplaces, colorptr->named.diff);
             printf(" }%s\n", (opts->distance ? "," : ""));
         }
@@ -115,6 +129,8 @@ bool print_color(const color_t *colorptr, const prog_opts_t *opts,   bool is_mai
                       cmyk,  sizeof(cmyk),
                       hsl,   sizeof(hsl),
                       hsv,   sizeof(hsv),
+                      oklab, sizeof(oklab),
+                      oklch, sizeof(oklch),
                       named, sizeof(named));
 
     if (opts->json) {
@@ -124,6 +140,8 @@ bool print_color(const color_t *colorptr, const prog_opts_t *opts,   bool is_mai
                "    \"cmyk\": { \"c\": %.*f, \"m\": %.*f, \"y\": %.*f, \"k\": %.*f },\n"
                "    \"hsl\": { \"h\": %.*f, \"s\": %.*f, \"l\": %.*f },\n"
                "    \"hsv\": { \"h\": %.*f, \"s\": %.*f, \"v\": %.*f },\n"
+               "    \"oklab\": { \"L\": %.*f, \"a\": %.*f, \"b\": %.*f },\n"
+               "    \"oklch\": { \"L\": %.*f, \"c\": %.*f, \"h\": %.*f },\n"
                "    \"named\": { \"name\": \"%s\", \"hex\": \"#%06x\", \"wsqrdist\": %.*f }\n"
                "  }%s\n",
                (is_main ? "main" : "distance"),
@@ -132,6 +150,8 @@ bool print_color(const color_t *colorptr, const prog_opts_t *opts,   bool is_mai
                opts->dplaces, colorptr->cmyk.c, opts->dplaces, colorptr->cmyk.m, opts->dplaces, colorptr->cmyk.y, opts->dplaces, colorptr->cmyk.k,
                opts->dplaces, colorptr->hsl.h, opts->dplaces, colorptr->hsl.sat, opts->dplaces, colorptr->hsl.l,
                opts->dplaces, colorptr->hsv.h, opts->dplaces, colorptr->hsv.sat, opts->dplaces, colorptr->hsv.v,
+               opts->dplaces, colorptr->oklab.L, opts->dplaces, colorptr->oklab.a, opts->dplaces, colorptr->oklab.b,
+               opts->dplaces, colorptr->oklch.L, opts->dplaces, colorptr->oklch.c, opts->dplaces, colorptr->oklch.h,
                colorptr->named.name, colorptr->named.hex, opts->dplaces, colorptr->named.diff, (opts->distance ? "," : ""));
         return false;
     } // end normal json mode
@@ -147,6 +167,8 @@ bool print_color(const color_t *colorptr, const prog_opts_t *opts,   bool is_mai
     print_color_line(&ctx, "CMYK :", "%s", cmyk);
     print_color_line(&ctx, "HSL  :", "%s", hsl);
     print_color_line(&ctx, "HSV  :", "%s", hsv);
+    print_color_line(&ctx, "Oklab:", "%s", oklab);
+    print_color_line(&ctx, "Oklch:", "%s", oklch);
     print_color_line_empty(&ctx);
     print_color_line(&ctx, "Named:", "%s", named);
 

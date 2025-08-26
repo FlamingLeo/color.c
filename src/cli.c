@@ -37,7 +37,7 @@ void parse_cli_args(int argc, char **argv, const char *progname_param, prog_opts
 
     // initialize defaults
     color_cap_t tmode = detect_terminal_color();
-    opts->cwset       = false; opts->cwidth      = 14;    opts->mapping     = tmode;
+    opts->cwset       = false; opts->cwidth      = 18;    opts->mapping     = tmode;
     opts->dplaces     = 2;     opts->webfmt      = false; opts->txtclr      = true;
     opts->json        = false; opts->conversion  = NULL;  opts->distance    = false;
 
@@ -103,6 +103,7 @@ void parse_cli_args(int argc, char **argv, const char *progname_param, prog_opts
     if (opts->conversion) {
         if (!strcasecmp_own(opts->conversion, "rgb")  && !strcasecmp_own(opts->conversion, "hex")
          && !strcasecmp_own(opts->conversion, "cmyk") && !strcasecmp_own(opts->conversion, "hsl")
-         && !strcasecmp_own(opts->conversion, "hsv")  && !strcasecmp_own(opts->conversion, "named")) ERROR_EXIT("unknown conversion type %s", opts->conversion);
+         && !strcasecmp_own(opts->conversion, "hsv")  && !strcasecmp_own(opts->conversion, "named")
+         && !strcasecmp_own(opts->conversion, "oklab") && !strcasecmp_own(opts->conversion, "oklch")) ERROR_EXIT("unknown conversion type %s", opts->conversion);
     }
 }

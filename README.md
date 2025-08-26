@@ -9,15 +9,15 @@
 
 ## Features
 - **Default**: Show a preview of the chosen color and conversions to different color models.
-    - example: `color lime green`
+    - Example: `color lime green`
 - **Difference**: Show previews and the color difference between two colors.
-    - example: `color -d 0xABC 0x123`
+    - Example: `color -d 0xABC 0x123`
 - **Conversion**: Convert a color to a specific color model.
-    - example: `color -c cmyk rgb(17,243,98)`
+    - Example: `color -c cmyk rgb(17,243,98)`
 - **JSON**: Get the results of any operation as ready-to-parse JSON output.
-    - example: `color -j -d red -c hex 255,0,192`
+    - Example: `color -j -d red -c hex 255,0,192`
 - **List**: Get a list of all supported named colors and their hex codes.
-    - example: `color -l`
+    - Example: `color -l`
 
 ## Usage and Formats
 **Usage**: `color [-c <model>] [-d <color>] [-f <n>] [-h] [-j] [-l [0|1]] [-m <map>] [-p] [-w <n>] [-W] [-x] <color> <color>`
@@ -35,7 +35,7 @@ Following options are supported:
 -m <map>  : map terminal color to 0-, 16-, 256- or true color output (default: your terminal's color mode)
             you may try and force unsupported terminals render higher color modes
 -p        : disable coloring text output (plain, for hard-to-read colors) (default: true)
--w <0..25>: choose the width of the left color square to display (h = w / 2) (default: 14)
+-w <0..25>: choose the width of the left color square to display (h = w / 2) (default: 18)
 -x        : use xkcd color names instead of css (default: false)
             this option must be set if you want to parse an xkcd color name
 -z        : print colors in web format (css) (default: false)
@@ -66,14 +66,27 @@ Following color models and input formats are supported (case-insensitive, whites
     - `hsv(h,s%,v%)`
     - `hsv(h,s,v)`
     - `h,s%,v%`
+- **Oklab** (`L` between 0.0 and 100.0, `a`, `b` any float)
+    - `oklab(L,a,b)` (optional percent signs for each component)
+- **Oklch** (`L`, `c` between 0.0 and 100.0, `h` mod 360)
+    - `oklch(L,c,h)` (optional percent signs for `L` and `c`)
+    - `L%,c,h`
+    - `L%,c%,h`
 
-Read more about the supported formats here: [RGB](https://en.wikipedia.org/wiki/RGB_color_model), [Hex](https://en.wikipedia.org/wiki/Web_colors), [CMYK](https://en.wikipedia.org/wiki/CMYK_color_model), [HSL and HSV](https://en.wikipedia.org/wiki/HSL_and_HSV).
+Read more about the supported formats here: [RGB](https://en.wikipedia.org/wiki/RGB_color_model), [Hex](https://en.wikipedia.org/wiki/Web_colors), [CMYK](https://en.wikipedia.org/wiki/CMYK_color_model), [HSL / HSV](https://en.wikipedia.org/wiki/HSL_and_HSV), [Oklab / Oklch](https://en.wikipedia.org/wiki/Oklab_color_space).
 
 > [!NOTE]  
 > A simple triplet will be parsed as RGB. To differentiate between RGB and HSV, percentage symbols are needed for saturation and value. Because HSL and HSV have the same structure from the parser's point of view, a triplet where the last two contain percentages will be parsed as HSV.
 
 > [!IMPORTANT]  
 > XKCD names have had whitespaces removed to not break existing functionality. To separate between `darkgreen` and `dark green`, the latter was changed to `dark-green`.
+
+### A Notice on Percentages
+For color models which use percentages, for any input *with* an explicit percent sign `%`, the number is always divided by 100. For inputs *without* explicit percent signs, if the number is between 0 and 1 (inclusive), it is automatically assumed that the number is already normalized. Otherwise, for values between 1 (non-inclusive) and 100 (inclusive), this value is taken as a percentage to be divided by 100.
+
+- Example: `cmyk(34, 0.4, 100, 1)` = `cmyk(0.34, 0.4, 1, 1)` = `cmyk(34%, 40%, 100%, 100%)`
+
+For Oklab (and Oklch), the above rules apply for `L` (and `c`). For `a` and `b`, CSS rules apply instead: if there is *no* explicit percent sign, the number is taken *as-is* (e.g. `0.4` remains `0.4`, `10.0` remains `10.0`).
 
 ## Build and  Installation
 **Usage**: `./install.sh [name]`
