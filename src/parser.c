@@ -10,6 +10,7 @@
 #include "utility.h"
 
 #define COPY_OR_RETURN(_dst,_src) do { int n = snprintf(_dst, sizeof(_dst), "%s", _src); if (n < 0) return 0; if ((size_t)n >= sizeof(_dst)) return 0; } while (0)
+#define IS_CONV(X)                ((conv) && strcasecmp_own(conv, (X)))
 
 // internal name array selection
 static const named_t *names    = css_colors;
@@ -567,16 +568,90 @@ int parse_color2(const char *in, color_t *out0, color_t *out1) {
     return parsed;
 }
 
+void list_colors(int l, const prog_opts_t *opts) {
+    char rgb[C_COL_BUFSIZE],   hex[C_COL_BUFSIZE],   cmyk[C_COL_BUFSIZE],
+         hsl[C_COL_BUFSIZE],   hsv[C_COL_BUFSIZE],
+         oklab[C_COL_BUFSIZE], oklch[C_COL_BUFSIZE],
+         named[STR_BUFSIZE];
 
-void list_colors(int l, color_cap_t mode) {
-    if (!l && mode == TC_TRUECOLOR)
+    color_t     clr;
+    color_cap_t mode     = opts->mapping;
+    const char *conv     = opts->conversion;
+
+    // json output
+    if (opts->json) {
+        printf("{\n");
         for (size_t i = 0; i < names_size; ++i) {
-            rgb_t rgb = hex_to_rgb(names[i].hex);
-            printf("\033[48;2;%d;%d;%dm    \x1b[0m %-21s#%06x\n", rgb.r, rgb.g, rgb.b, names[i].name, names[i].hex);
+            clr.rgb   = hex_to_rgb(names[i].hex);
+            clr.hex   = names[i].hex;
+            clr.cmyk  = rgb_to_cmyk(&clr.rgb);
+            clr.hsl   = rgb_to_hsl(&clr.rgb);
+            clr.hsv   = rgb_to_hsv(&clr.rgb);
+            clr.oklab = rgb_to_oklab(&clr.rgb);
+            clr.oklch = rgb_to_oklch(&clr.rgb);
+            clr.named = closest_named_weighted_rgb(&clr.rgb);
+
+            // pre-format strings
+            fmt_color_strings(&clr, opts->webfmt, opts->dplaces,
+                              rgb,   sizeof(rgb),
+                              hex,   sizeof(hex),
+                              cmyk,  sizeof(cmyk),
+                              hsl,   sizeof(hsl),
+                              hsv,   sizeof(hsv),
+                              oklab, sizeof(oklab),
+                              oklch, sizeof(oklch),
+                              named, sizeof(named));
+
+            printf("  \"%s\": ", names[i].name);
+
+            // should we do conversion? no conv: hex
+            // assume input validated beforehand, so no invalid conversions may occur (!)
+            if      (!conv || IS_CONV("hex")) { printf("{ \"hex\": \"#%06x\" }", clr.hex); }
+            else if (IS_CONV("rgb"))          { printf("{ \"r\": %d, \"g\": %d, \"b\": %d }", clr.rgb.r, clr.rgb.g, clr.rgb.b); }
+            else if (IS_CONV("cmyk"))         { printf("{ \"c\": %.*f, \"m\": %.*f, \"y\": %.*f, \"k\": %.*f }", opts->dplaces, clr.cmyk.c, opts->dplaces, clr.cmyk.m, opts->dplaces, clr.cmyk.y, opts->dplaces, clr.cmyk.k); }
+            else if (IS_CONV("hsl"))          { printf("{ \"h\": %.*f, \"s\": %.*f, \"l\": %.*f }", opts->dplaces, clr.hsl.h, opts->dplaces, clr.hsl.sat, opts->dplaces, clr.hsl.l); }
+            else if (IS_CONV("hsv"))          { printf("{ \"h\": %.*f, \"s\": %.*f, \"v\": %.*f }", opts->dplaces, clr.hsv.h, opts->dplaces, clr.hsv.sat, opts->dplaces, clr.hsv.v); }
+            else if (IS_CONV("oklab"))        { printf("{ \"L\": %.*f, \"a\": %.*f, \"b\": %.*f }", opts->dplaces, clr.oklab.L, opts->dplaces, clr.oklab.a, opts->dplaces, clr.oklab.b); }
+            else if (IS_CONV("oklch"))        { printf("{ \"L\": %.*f, \"c\": %.*f, \"h\": %.*f }", opts->dplaces, clr.oklch.L, opts->dplaces, clr.oklch.c, opts->dplaces, clr.oklch.h); }
+            else if (IS_CONV("named"))        { printf("{ \"name\": \"%s\", \"hex\": \"#%06x\", \"wsqrdist\": %.*f }", clr.named.name, clr.named.hex, opts->dplaces, clr.named.diff); }
+            printf("%s\n", (i == names_size - 1) ? "" : ",");
         }
-    else {
-        printf("name,color\n");
-        for (size_t i = 0; i < names_size; ++i) printf("%s,%06x\n", names[i].name, names[i].hex);
+        printf("}\n");
+        return;
+    }
+
+    // non-json (standard / csv)
+    for (size_t i = 0; i < names_size; ++i) {
+        clr.rgb   = hex_to_rgb(names[i].hex); clr.hex   = names[i].hex;                         clr.cmyk  = rgb_to_cmyk(&clr.rgb);
+        clr.hsl   = rgb_to_hsl(&clr.rgb);     clr.hsv   = rgb_to_hsv(&clr.rgb);                 clr.oklab = rgb_to_oklab(&clr.rgb);
+        clr.oklch = rgb_to_oklch(&clr.rgb);   clr.named = closest_named_weighted_rgb(&clr.rgb);
+
+        fmt_color_strings(&clr, opts->webfmt, opts->dplaces,
+                          rgb,   sizeof(rgb),
+                          hex,   sizeof(hex),
+                          cmyk,  sizeof(cmyk),
+                          hsl,   sizeof(hsl),
+                          hsv,   sizeof(hsv),
+                          oklab, sizeof(oklab),
+                          oklch, sizeof(oklch),
+                          named, sizeof(named));
+
+        // decide upon representation
+        // assume input validated beforehand, so no invalid conversions may occur (!)
+        const char *value;
+        if      (!conv || IS_CONV("hex")) value = hex;
+        else if (IS_CONV("rgb"))          value = rgb;
+        else if (IS_CONV("cmyk"))         value = cmyk;
+        else if (IS_CONV("hsl"))          value = hsl;
+        else if (IS_CONV("hsv"))          value = hsv;
+        else if (IS_CONV("oklab"))        value = oklab;
+        else if (IS_CONV("oklch"))        value = oklch;
+        else if (IS_CONV("named"))        value = named;
+
+        // csv; truecolor
+        if ((l == 1) || (mode != TC_TRUECOLOR)) { printf("%s,\"%s\"\n", names[i].name, value); }
+        else                                    { printf("\033[48;2;%d;%d;%dm    \x1b[0m %-21s%s\n", clr.rgb.r, clr.rgb.g, clr.rgb.b, names[i].name, value);
+        }
     }
 }
 

@@ -7,6 +7,14 @@
 #include "parser.h"
 #include "printer.h"
 
+// helper function to immediately validate conversion
+static void validate_conversion(const char *conv, const char *progname) {
+    if (!strcasecmp_own(conv, "rgb")   && !strcasecmp_own(conv, "hex")
+     && !strcasecmp_own(conv, "cmyk")  && !strcasecmp_own(conv, "hsl")
+     && !strcasecmp_own(conv, "hsv")   && !strcasecmp_own(conv, "named")
+     && !strcasecmp_own(conv, "oklab") && !strcasecmp_own(conv, "oklch")) ERROR_EXIT("unknown conversion type %s", conv);
+}
+
 color_cap_t detect_terminal_color() {
     // not a tty (e.g. file output): no color
     if (!isatty(STDOUT_FILENO)) return TC_NONE;
@@ -49,7 +57,7 @@ void parse_cli_args(int argc, char **argv, const char *progname_param, prog_opts
             int lmode = 0;
             if (argc > arg + 1)         lmode = safe_atoi(argv[++arg], progname);
             if (lmode < 0 || lmode > 1) ERROR_EXIT("invalid list mode %d", lmode);
-            else                        list_colors(lmode, opts->mapping);
+            else                        list_colors(lmode, opts);
             exit(0);
         }
 
@@ -69,7 +77,7 @@ void parse_cli_args(int argc, char **argv, const char *progname_param, prog_opts
             else {            if (parse_color2(buf, colorD, color) != 2) ERROR_EXIT("could not parse -d color1 color2 %s", buf); *color_set = true; arg = end - 1; }
             opts->distance = true;
         }
-        else if (argv[arg][1] == 'c' && argc > arg + 1) { opts->conversion = argv[++arg]; }
+        else if (argv[arg][1] == 'c' && argc > arg + 1) { opts->conversion = argv[++arg]; validate_conversion(opts->conversion, progname); }
         else if (argv[arg][1] == 'f' && argc > arg + 1) { opts->dplaces = safe_atoi(argv[++arg], progname); opts->dplaces = CLAMP(opts->dplaces, 0, 5); }
         else if (argv[arg][1] == 'w' && argc > arg + 1) { opts->cwidth  = safe_atoi(argv[++arg], progname); opts->cwidth  = CLAMP(opts->cwidth, 0, 25); opts->cwset = true; }
         else if (argv[arg][1] == 'm' && argc > arg + 1) {
@@ -99,11 +107,5 @@ void parse_cli_args(int argc, char **argv, const char *progname_param, prog_opts
         }
     }
 
-    // validate conversion option if present
-    if (opts->conversion) {
-        if (!strcasecmp_own(opts->conversion, "rgb")  && !strcasecmp_own(opts->conversion, "hex")
-         && !strcasecmp_own(opts->conversion, "cmyk") && !strcasecmp_own(opts->conversion, "hsl")
-         && !strcasecmp_own(opts->conversion, "hsv")  && !strcasecmp_own(opts->conversion, "named")
-         && !strcasecmp_own(opts->conversion, "oklab") && !strcasecmp_own(opts->conversion, "oklch")) ERROR_EXIT("unknown conversion type %s", opts->conversion);
-    }
+    
 }

@@ -45,14 +45,14 @@ bool strcasestr_own(const char *hay, const char *needle);
 
 // format textual representations for a color into provided buffers
 void fmt_color_strings(const color_t *colorptr, bool webfmt, int dplaces,
-                              char *rgb,   size_t rgb_s,
-                              char *hex,   size_t hex_s,
-                              char *cmyk,  size_t cmyk_s,
-                              char *hsl,   size_t hsl_s,
-                              char *hsv,   size_t hsv_s,
-                              char *oklab, size_t oklab_s,
-                              char *oklch, size_t oklch_s,
-                              char *named, size_t named_s);
+                       char *rgb,   size_t rgb_s,
+                       char *hex,   size_t hex_s,
+                       char *cmyk,  size_t cmyk_s,
+                       char *hsl,   size_t hsl_s,
+                       char *hsv,   size_t hsv_s,
+                       char *oklab, size_t oklab_s,
+                       char *oklch, size_t oklch_s,
+                       char *named, size_t named_s);
 
 // fill bgbufptr and fgbufptr given mapping and rgb
 // returns the calculated ansi index for 16 or 256 colors and -1 otherwise

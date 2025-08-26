@@ -54,11 +54,14 @@ int parse_color(const char *in, color_t *out);
 int parse_color2(const char *in, color_t *out0, color_t *out1);
 
 // print a formatted list of all named colors (css or xkcd, based on choice)
-// if l is 0, the result is a prettified table consisting of "colorsample name #rrggbb" separated by whitespace
-// if l is 1, the result is a csv-like output "name,#rrggbb"
+// if l is 0, the result is a prettified table consisting of "colorsample name color" separated by whitespace
+// if l is 1 or mapping is not truecolor, the result is a csv-like output "name,color"
+// by default, the color is hexadecimal, but if a conversion model is specified, the color is converted
+// json is also supported
 //
 // if the mode is not truecolor, csv output is printed
-void list_colors(int l, color_cap_t mode);
+// program options are used for json / conversion modes
+void list_colors(int l, const prog_opts_t *opts);
 
 // use xkcd color names instead of css (updates internal pointer and size)
 void use_xkcd();

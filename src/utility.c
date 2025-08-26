@@ -81,14 +81,14 @@ bool strcasestr_own(const char *hay, const char *needle) {
 }
 
 void fmt_color_strings(const color_t *colorptr, bool webfmt, int dplaces,
-                              char *rgb,   size_t rgb_s,
-                              char *hex,   size_t hex_s,
-                              char *cmyk,  size_t cmyk_s,
-                              char *hsl,   size_t hsl_s,
-                              char *hsv,   size_t hsv_s,
-                              char *oklab, size_t oklab_s,
-                              char *oklch, size_t oklch_s,
-                              char *named, size_t named_s) {
+                       char *rgb,   size_t rgb_s,
+                       char *hex,   size_t hex_s,
+                       char *cmyk,  size_t cmyk_s,
+                       char *hsl,   size_t hsl_s,
+                       char *hsv,   size_t hsv_s,
+                       char *oklab, size_t oklab_s,
+                       char *oklch, size_t oklch_s,
+                       char *named, size_t named_s) {
     if (webfmt) {
         if (rgb && rgb_s)     snprintf(rgb,   rgb_s,   "rgb(%d,%d,%d)",                     colorptr->rgb.r, colorptr->rgb.g, colorptr->rgb.b);
         if (hex && hex_s)     snprintf(hex,   hex_s,   "#%06x",                             colorptr->hex);
@@ -104,8 +104,8 @@ void fmt_color_strings(const color_t *colorptr, bool webfmt, int dplaces,
         if (cmyk && cmyk_s)   snprintf(cmyk,  cmyk_s,  "%.*f%%,%.*f%%,%.*f%%,%.*f%%",       dplaces, colorptr->cmyk.c * 100.0, dplaces, colorptr->cmyk.m * 100.0, dplaces, colorptr->cmyk.y * 100.0, dplaces, colorptr->cmyk.k * 100.0);
         if (hsl && hsl_s)     snprintf(hsl,   hsl_s,   "%.*f,%.*f%%,%.*f%%",                dplaces, colorptr->hsl.h, dplaces, colorptr->hsl.sat * 100.0, dplaces, colorptr->hsl.l * 100.0);
         if (hsv && hsv_s)     snprintf(hsv,   hsv_s,   "%.*f,%.*f%%,%.*f%%",                dplaces, colorptr->hsv.h, dplaces, colorptr->hsv.sat * 100.0, dplaces, colorptr->hsv.v * 100.0);
-        if (oklab && oklab_s) snprintf(oklab, oklab_s, "%.*f%%,%.*f,%.*f",                   dplaces, colorptr->oklab.L * 100.0, dplaces, colorptr->oklab.a, dplaces, colorptr->oklab.b);
-        if (oklch && oklch_s) snprintf(oklch, oklch_s, "%.*f%%,%.*f%%,%.*f",               dplaces, colorptr->oklch.L * 100.0, dplaces, colorptr->oklch.c * 100.0, dplaces, colorptr->oklch.h);
+        if (oklab && oklab_s) snprintf(oklab, oklab_s, "%.*f%%,%.*f,%.*f",                  dplaces, colorptr->oklab.L * 100.0, dplaces, colorptr->oklab.a, dplaces, colorptr->oklab.b);
+        if (oklch && oklch_s) snprintf(oklch, oklch_s, "%.*f%%,%.*f%%,%.*f",                dplaces, colorptr->oklch.L * 100.0, dplaces, colorptr->oklch.c * 100.0, dplaces, colorptr->oklch.h);
         if (named && named_s) snprintf(named, named_s, "%s (%06x) (dist² %.*f)",            colorptr->named.name, colorptr->named.hex, dplaces, colorptr->named.diff);
     }
 }
