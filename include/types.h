@@ -75,17 +75,27 @@ typedef struct {
     char *fgbufptr;    // pointer to char buffer containing foreground color ANSI escape code
 } print_ctx_t;
 
+// color difference method
+typedef enum {
+    CDIFF_RGB = 0,  // plain RGB squared distance
+    CDIFF_WRGB,     // weighted RGB squared distance (W_R, W_G, W_B)
+    CDIFF_OKLAB,    // perceptual Oklab squared distance
+    CDIFF_ALL      // print both RGB and Oklab distances
+} cdiff_t;
+
 // program options container
 typedef struct {
-    color_cap_t mapping;    // terminal color mode
-    bool        cwset;      // did we set the color preview width manually via the command line?
-    int         cwidth;     // color preview width
-    int         dplaces;    // number of decimal places printed for floats (rounding via printf)
-    bool        webfmt;     // display colors in css format (e.g. "rgb(255,255,255)" instead of "255,255,255")?
-    bool        txtclr;     // should the text be colored aswell?
-    bool        json;       // print out in json format?
-    char       *conversion; // pointer into argv
-    bool        distance;   // should we do distance calculation between two colors?
+    color_cap_t mapping;       // terminal color mode
+    bool        cwset;         // did we set the color preview width manually via the command line?
+    int         cwidth;        // color preview width
+    int         dplaces;       // number of decimal places printed for floats (rounding via printf)
+    bool        webfmt;        // display colors in css format (e.g. "rgb(255,255,255)" instead of "255,255,255")?
+    bool        txtclr;        // should the text be colored aswell?
+    bool        json;          // print out in json format?
+    char       *conversion;    // pointer into argv
+    bool        distance;      // should we do distance calculation between two colors?
+    cdiff_t     cdiff;         // color difference metric
 } prog_opts_t;
+
 
 #endif

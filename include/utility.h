@@ -12,6 +12,9 @@ double dist2_rgb(const rgb_t *a, const rgb_t *b);
 // squared weighted euclidian distance between two rgb colors
 double weighted_dist2_rgb(const rgb_t *a, const rgb_t *b, double wr, double wg, double wb);
 
+// squared euclidian distance between two oklab colors, more perceptually accurate than rgb euclidian distance
+double dist2_oklab(const oklab_t *a, const oklab_t *b);
+
 // string representation of terminal color mode
 const char *tcolor_tostr(color_cap_t c);
 

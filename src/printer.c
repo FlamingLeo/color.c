@@ -3,7 +3,7 @@
 #include "printer.h"
 #include "utility.h"
 
-void print_usage(FILE* stream, const char *progname) { fprintf(stream, "usage: %s [-c <model>] [-d <color>] [-f <n>] [-h] [-j] [-l [0|1]] [-m <map>] [-p] [-w <n>] [-W] [-x] <color>\nsee readme or help for a list of valid formats\n", progname); }
+void print_usage(FILE* stream, const char *progname) { fprintf(stream, "usage: %s [-c <model>] [-d <color>] [-D <cdiff>] [-f <n>] [-h] [-j] [-l [0|1]] [-m <map>] [-p] [-w <n>] [-W] [-x] <color>\nsee readme or help for a list of valid formats\n", progname); }
 
 void print_help(const char* progname) {
     printf("color - a color printing (and conversion) tool for true color terminals\n\n");
@@ -11,6 +11,7 @@ void print_help(const char* progname) {
     printf("\noptions:\n"
            "  -c <model>: only show the conversion of the chosen color to the specified model, then exit\n"
            "  -d <color>: choose a color to compute the difference with\n"
+           "  -D <cdiff>: choose color difference method: rgb | wrgb / weighted | oklab | all (default: all)\n"
            "  -f <0..5> : choose the maximum amount of decimal places to print (default: 2)\n"
            "              0 rounds the numbers to the nearest integer\n"
            "  -h        : show this help text and exit\n"

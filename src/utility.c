@@ -22,6 +22,12 @@ double weighted_dist2_rgb(const rgb_t *a, const rgb_t *b, double wr, double wg, 
     return wr * dr * dr + wg * dg * dg + wb * db * db;
 }
 
+double dist2_oklab(const oklab_t *a, const oklab_t *b) {
+    return (a->L - b->L) * (a->L - b->L)
+         + (a->a - b->a) * (a->a - b->a)
+         + (a->b - b->b) * (a->b - b->b);
+}
+
 const char *tcolor_tostr(color_cap_t c) {
     switch (c) {
         case TC_NONE:      return "none";

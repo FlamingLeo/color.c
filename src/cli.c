@@ -45,9 +45,10 @@ void parse_cli_args(int argc, char **argv, const char *progname_param, prog_opts
 
     // initialize defaults
     color_cap_t tmode = detect_terminal_color();
-    opts->cwset       = false; opts->cwidth      = 18;    opts->mapping     = tmode;
-    opts->dplaces     = 2;     opts->webfmt      = false; opts->txtclr      = true;
-    opts->json        = false; opts->conversion  = NULL;  opts->distance    = false;
+    opts->cwset       = false;     opts->cwidth      = 18;    opts->mapping     = tmode;
+    opts->dplaces     = 2;         opts->webfmt      = false; opts->txtclr      = true;
+    opts->json        = false;     opts->conversion  = NULL;  opts->distance    = false;
+    opts->cdiff       = CDIFF_ALL;
 
     int arg = 1;
     while ((argc > arg) && (argv[arg][0] == '-')) {
@@ -76,6 +77,15 @@ void parse_cli_args(int argc, char **argv, const char *progname_param, prog_opts
             if (end < argc) { if (!parse_color(buf, colorD))             ERROR_EXIT("could not parse -d color %s", buf);                            arg = end - 1; } 
             else {            if (parse_color2(buf, colorD, color) != 2) ERROR_EXIT("could not parse -d color1 color2 %s", buf); *color_set = true; arg = end - 1; }
             opts->distance = true;
+        }
+        else if (argv[arg][1] == 'D' && argc > arg + 1) {
+            const char *m = argv[++arg];
+
+            if      (strcasecmp_own(m, "rgb"))                                   opts->cdiff = CDIFF_RGB;
+            else if (strcasecmp_own(m, "wrgb") || strcasecmp_own(m, "weighted")) opts->cdiff = CDIFF_WRGB;
+            else if (strcasecmp_own(m, "oklab"))                                 opts->cdiff = CDIFF_OKLAB;
+            else if (strcasecmp_own(m, "all"))                                   opts->cdiff = CDIFF_ALL;
+            else    ERROR_EXIT("unknown diff method %s", m);
         }
         else if (argv[arg][1] == 'c' && argc > arg + 1) { opts->conversion = argv[++arg]; validate_conversion(opts->conversion, progname); }
         else if (argv[arg][1] == 'f' && argc > arg + 1) { opts->dplaces = safe_atoi(argv[++arg], progname); opts->dplaces = CLAMP(opts->dplaces, 0, 5); }

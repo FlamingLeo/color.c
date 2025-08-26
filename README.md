@@ -11,21 +11,22 @@
 - **Default**: Show a preview of the chosen color and conversions to different color models.
     - Example: `color lime green`
 - **Difference**: Show previews and the color difference between two colors.
-    - Example: `color -d 0xABC 0x123`
+    - Example: `color -d 0xABC -D oklab 0x123`
 - **Conversion**: Convert a color to a specific color model.
     - Example: `color -c cmyk rgb(17,243,98)`
 - **JSON**: Get the results of any operation as ready-to-parse JSON output.
     - Example: `color -j -d red -c hex 255,0,192`
 - **List**: Get a list of all supported named colors and their hex codes.
-    - Example: `color -l`
+    - Example: `color -x -l`
 
 ## Usage and Formats
-**Usage**: `color [-c <model>] [-d <color>] [-f <n>] [-h] [-j] [-l [0|1]] [-m <map>] [-p] [-w <n>] [-W] [-x] <color> <color>`
+**Usage**: `color [-c <model>] [-d <color>] [-D <cdiff>] [-f <n>] [-h] [-j] [-l [0|1]] [-m <map>] [-p] [-w <n>] [-W] [-x] <color> <color>`
 
 Following options are supported:
 ```text
 -c <model>: only show the conversion of the chosen color to the specified model, then exit
 -d <color>: choose a color to compute the difference with
+-D <cdiff>: choose color difference method: rgb | wrgb / weighted | oklab | all (default: all)
 -f <0..5> : choose the maximum amount of decimal places to print (default: 2)
 -h        : show this help text and exit
 -j        : print output in json format
