@@ -9,22 +9,25 @@
 
 ## Features
 - **Default**: Show a preview of the chosen color and conversions to different color models.
-    - Example: `color lime green`
+    - Example: `color -W periwinkle` (periwinkle, sample w/ conversions, CSS format)
 - **Difference**: Show previews and the color difference between two colors.
-    - Example: `color -d 0xABC -D oklab 0x123`
+    - Example: `color -d 0xABC -D oklab 0x123`(distance between `#aabbcc` and `#112233` using Oklab)
+- **Contrast**: Show previews and the WCAG contrast between two colors.
+    - Example: `color -C lime green` (contrast between `lime` and `green`, fore- and background)
 - **Conversion**: Convert a color to a specific color model.
-    - Example: `color -c cmyk rgb(17,243,98)`
+    - Example: `cccccccccc` (convert `rgb(17,243,98)` to `cmyk(93%,0%,59.67%,4.71%)`)
 - **JSON**: Get the results of any operation as ready-to-parse JSON output.
-    - Example: `color -j -d red -c hex 255,0,192`
-- **List**: Get a list of all supported named colors and their hex codes.
-    - Example: `color -x -l`
+    - Example: `color -j -d red -c hex 255,0,192` (distance between `red` and `rgb(255,0,192)`, both numbers converted to hexadecimal, as JSON output)
+- **List**: Get a list of all supported named colors and their color codes.
+    - Example: `color -x -c oklch -l` (all named XKCD colors, Oklch)
 
 ## Usage and Formats
-**Usage**: `color [-c <model>] [-d <color>] [-D <cdiff>] [-f <n>] [-h] [-j] [-l [0|1]] [-m <map>] [-p] [-w <n>] [-W] [-x] <color> <color>`
+**Usage**: `color [-c <model>] [-C <color>] [-d <color>] [-D <cdiff>] [-f <n>] [-h] [-j] [-l [0|1]] [-m <map>] [-p] [-w <n>] [-W] [-x] <color> <color>`
 
 Following options are supported:
 ```text
 -c <model>: only show the conversion of the chosen color to the specified model, then exit
+-C <color>: choose a color to compute the contrast against
 -d <color>: choose a color to compute the difference with
 -D <cdiff>: choose color difference method: rgb | wrgb / weighted | oklab | all (default: all)
 -f <0..5> : choose the maximum amount of decimal places to print (default: 2)

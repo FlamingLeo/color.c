@@ -1,5 +1,7 @@
+#include <assert.h>
 #include <ctype.h>
 #include <errno.h>
+#include <math.h>
 #include <stddef.h>
 #include <stdlib.h>
 #include <string.h>
@@ -7,6 +9,25 @@
 #include "converter.h"
 #include "utility.h"
 #include "printer.h"
+
+double srgb_to_linear(double c) {
+    if (c <= 0.04045) return c / 12.92;
+    return pow((c + 0.055) / 1.055, 2.4);
+}
+
+double linear_to_srgb(double c) {
+    if (c <= 0.0031308) return 12.92 * c;
+    return 1.055 * pow(c, 1.0 / 2.4) - 0.055;
+}
+
+double relative_luminance_rgb(const rgb_t *rgb) {
+    assert(rgb);
+
+    double r = srgb_to_linear(rgb->r / 255.0);
+    double g = srgb_to_linear(rgb->g / 255.0);
+    double b = srgb_to_linear(rgb->b / 255.0);
+    return 0.2126 * r + 0.7152 * g + 0.0722 * b;
+}
 
 double dist2_rgb(const rgb_t *a, const rgb_t *b) {
     double dr = (double)a->r - (double)b->r;

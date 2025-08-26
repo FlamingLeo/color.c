@@ -3,13 +3,14 @@
 #include "printer.h"
 #include "utility.h"
 
-void print_usage(FILE* stream, const char *progname) { fprintf(stream, "usage: %s [-c <model>] [-d <color>] [-D <cdiff>] [-f <n>] [-h] [-j] [-l [0|1]] [-m <map>] [-p] [-w <n>] [-W] [-x] <color>\nsee readme or help for a list of valid formats\n", progname); }
+void print_usage(FILE* stream, const char *progname) { fprintf(stream, "usage: %s [-c <model>] [-C <color>] [-d <color>] [-D <cdiff>] [-f <n>] [-h] [-j] [-l [0|1]] [-m <map>] [-p] [-w <n>] [-W] [-x] <color>\nsee readme or help for a list of valid formats\n", progname); }
 
 void print_help(const char* progname) {
     printf("color - a color printing (and conversion) tool for true color terminals\n\n");
     print_usage(stdout, progname);
     printf("\noptions:\n"
            "  -c <model>: only show the conversion of the chosen color to the specified model, then exit\n"
+           "  -C <color>: choose a color to compute the contrast against\n"
            "  -d <color>: choose a color to compute the difference with\n"
            "  -D <cdiff>: choose color difference method: rgb | wrgb / weighted | oklab | all (default: all)\n"
            "  -f <0..5> : choose the maximum amount of decimal places to print (default: 2)\n"
@@ -76,8 +77,10 @@ void print_color_line_empty(print_ctx_t *ctx) {
     printf("%s%*s%s\n", left_bg, ctx->cwidth, ctx->cwidth > 0 ? " " : "", ctx->reset);
 }
 
-bool print_color(const color_t *colorptr, const prog_opts_t *opts,   bool is_main,      char       *bgbufptr, 
-                 char          *fgbufptr, int                cwidth, int  cheight_orig, const char *reset_default) {
+bool print_color(const color_t *colorptr, const prog_opts_t *opts,
+                 const char *json_label, bool json_add_comma,
+                 char *bgbufptr, char *fgbufptr,
+                 int cwidth, int cheight_orig, const char *reset_default) {
     int cheight_local = cheight_orig;
     const char *reset = reset_default;
 
@@ -106,7 +109,7 @@ bool print_color(const color_t *colorptr, const prog_opts_t *opts,   bool is_mai
             else if (strcasecmp_own(opts->conversion, "oklch")) { fmt_color_strings(colorptr, opts->webfmt, opts->dplaces, NULL, 0, NULL, 0, NULL, 0, NULL, 0, NULL, 0, NULL, 0, oklch, sizeof(oklch), NULL, 0); printf("%s\n", oklch); }
             else if (strcasecmp_own(opts->conversion, "named")) { fmt_color_strings(colorptr, opts->webfmt, opts->dplaces, NULL, 0, NULL, 0, NULL, 0, NULL, 0, NULL, 0, NULL, 0, NULL, 0, named, sizeof(named)); printf("%s\n", named); }
         } else {
-            printf("  \"%s\" : { ", (is_main ? "main" : "distance"));
+            printf("  \"%s\" : { ", json_label);
             if      (strcasecmp_own(opts->conversion, "rgb"))   printf("\"rgb\": { \"r\": %d, \"g\": %d, \"b\": %d }",                            colorptr->rgb.r, colorptr->rgb.g, colorptr->rgb.b);
             else if (strcasecmp_own(opts->conversion, "hex"))   printf("\"hex\": \"#%06x\"",                                                      colorptr->hex);
             else if (strcasecmp_own(opts->conversion, "cmyk"))  printf("\"cmyk\": { \"c\": %.*f, \"m\": %.*f, \"y\": %.*f, \"k\": %.*f }",        opts->dplaces, colorptr->cmyk.c, opts->dplaces, colorptr->cmyk.m, opts->dplaces, colorptr->cmyk.y, opts->dplaces, colorptr->cmyk.k);
@@ -115,7 +118,7 @@ bool print_color(const color_t *colorptr, const prog_opts_t *opts,   bool is_mai
             else if (strcasecmp_own(opts->conversion, "oklab")) printf("\"oklab\": { \"L\": %.*f, \"a\": %.*f, \"b\": %.*f }",                    opts->dplaces, colorptr->oklab.L, opts->dplaces, colorptr->oklab.a, opts->dplaces, colorptr->oklab.b);
             else if (strcasecmp_own(opts->conversion, "oklch")) printf("\"oklch\": { \"L\": %.*f, \"c\": %.*f, \"h\": %.*f }",                    opts->dplaces, colorptr->oklch.L, opts->dplaces, colorptr->oklch.c, opts->dplaces, colorptr->oklch.h);
             else if (strcasecmp_own(opts->conversion, "named")) printf("\"named\": { \"name\": \"%s\", \"hex\": \"#%06x\", \"wsqrdist\": %.*f }", colorptr->named.name, colorptr->named.hex, opts->dplaces, colorptr->named.diff);
-            printf(" }%s\n", (opts->distance ? "," : ""));
+            printf(" }%s\n", (json_add_comma ? "," : ""));
         }
         return true;
     } // end conversion mode
@@ -145,7 +148,7 @@ bool print_color(const color_t *colorptr, const prog_opts_t *opts,   bool is_mai
                "    \"oklch\": { \"L\": %.*f, \"c\": %.*f, \"h\": %.*f },\n"
                "    \"named\": { \"name\": \"%s\", \"hex\": \"#%06x\", \"wsqrdist\": %.*f }\n"
                "  }%s\n",
-               (is_main ? "main" : "distance"),
+               json_label,
                colorptr->rgb.r, colorptr->rgb.g, colorptr->rgb.b,
                colorptr->hex,
                opts->dplaces, colorptr->cmyk.c, opts->dplaces, colorptr->cmyk.m, opts->dplaces, colorptr->cmyk.y, opts->dplaces, colorptr->cmyk.k,
@@ -153,7 +156,7 @@ bool print_color(const color_t *colorptr, const prog_opts_t *opts,   bool is_mai
                opts->dplaces, colorptr->hsv.h, opts->dplaces, colorptr->hsv.sat, opts->dplaces, colorptr->hsv.v,
                opts->dplaces, colorptr->oklab.L, opts->dplaces, colorptr->oklab.a, opts->dplaces, colorptr->oklab.b,
                opts->dplaces, colorptr->oklch.L, opts->dplaces, colorptr->oklch.c, opts->dplaces, colorptr->oklch.h,
-               colorptr->named.name, colorptr->named.hex, opts->dplaces, colorptr->named.diff, (opts->distance ? "," : ""));
+               colorptr->named.name, colorptr->named.hex, opts->dplaces, colorptr->named.diff, (json_add_comma ? "," : ""));
         return false;
     } // end normal json mode
 

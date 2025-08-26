@@ -24,18 +24,6 @@ static const rgb_t ansi16_rgb[16] = {
 // 6 cube levels used by xterm 256
 static const int cube_levels[6] = {0, 95, 135, 175, 215, 255};
 
-// helper: linearize sRGB channel 
-static inline double srgb_to_linear(double c) {
-    if (c <= 0.04045) return c / 12.92;
-    return pow((c + 0.055) / 1.055, 2.4);
-}
-
-// helper: gamma-encode linear channel
-static inline double linear_to_srgb(double c) {
-    if (c <= 0.0031308) return 12.92 * c;
-    return 1.055 * pow(c, 1.0 / 2.4) - 0.055;
-}
-
 // formulas mostly from rapidtables:
 //   https://www.rapidtables.com/convert/color/
 //

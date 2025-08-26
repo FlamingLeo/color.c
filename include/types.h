@@ -4,15 +4,16 @@
 
 #include <stdbool.h>
 
-#define MIN(a,b)              ((a) < (b) ? (a) : (b))
-#define MAX(a,b)              ((a) > (b) ? (a) : (b))
+#define ARRAY_LENGTH(x)       (sizeof(x) / sizeof((x)[0]))
 #define CLAMP(_n, _l, _r)     ((_n) < (_l) ? (_l) : ((_n) > (_r) ? (_r) : (_n)))
 #define ERROR_EXIT(_fmt, ...) do { fprintf(stderr, "error: " _fmt "\n\n", ##__VA_ARGS__); print_usage(stderr, progname); exit(EXIT_FAILURE); } while(0)
+#define MAX(a,b)              ((a) > (b) ? (a) : (b))
+#define MIN(a,b)              ((a) < (b) ? (a) : (b))
 
-#define ZERO_THRESH 1e-12
-#define STR_BUFSIZE   128
-#define C_STR_BUFSIZE 20
 #define C_COL_BUFSIZE 64
+#define C_STR_BUFSIZE 20
+#define STR_BUFSIZE   128
+#define ZERO_THRESH 1e-12
 
 // source: https://en.wikipedia.org/wiki/YCbCr#ITU-R_BT.601_conversion
 #define W_R 0.299
@@ -94,6 +95,7 @@ typedef struct {
     bool        json;          // print out in json format?
     char       *conversion;    // pointer into argv
     bool        distance;      // should we do distance calculation between two colors?
+    bool        contrast;      // should we do contrast calculation between two colors?
     cdiff_t     cdiff;         // color difference metric
 } prog_opts_t;
 

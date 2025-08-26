@@ -40,15 +40,16 @@ color_cap_t detect_terminal_color() {
     return TC_NONE;
 }
 
-void parse_cli_args(int argc, char **argv, const char *progname_param, prog_opts_t *opts, color_t *color, color_t *colorD, bool *color_set) {
-    const char *progname = progname_param;
+void parse_cli_args(int argc, char **argv, const char *pname, prog_opts_t *opts,
+                    color_t *color, color_t *colorD, color_t *colorC, bool *color_set) {
+    const char *progname = pname;
 
     // initialize defaults
     color_cap_t tmode = detect_terminal_color();
-    opts->cwset       = false;     opts->cwidth      = 18;    opts->mapping     = tmode;
-    opts->dplaces     = 2;         opts->webfmt      = false; opts->txtclr      = true;
-    opts->json        = false;     opts->conversion  = NULL;  opts->distance    = false;
-    opts->cdiff       = CDIFF_ALL;
+    opts->cwset       = false; opts->cwidth      = 18;        opts->mapping     = tmode;
+    opts->dplaces     = 2;     opts->webfmt      = false;     opts->txtclr      = true;
+    opts->json        = false; opts->conversion  = NULL;      opts->distance    = false;
+    opts->contrast    = false; opts->cdiff       = CDIFF_ALL;
 
     int arg = 1;
     while ((argc > arg) && (argv[arg][0] == '-')) {
@@ -69,6 +70,15 @@ void parse_cli_args(int argc, char **argv, const char *progname_param, prog_opts
         else if (argv[arg][1] == 'x') use_xkcd();
 
         // options that expect an argument
+        else if (argv[arg][1] == 'C' && argc > arg + 1) {
+            char buf[STR_BUFSIZE] = "";
+            for (++arg; arg < argc && argv[arg][0] != '-'; ++arg) if (!strncat_safe(buf, sizeof(buf), argv[arg], strlen(buf) > 0)) ERROR_EXIT("input too large");
+
+            int end = arg;
+            if (end < argc) { if (!parse_color(buf, colorC))             ERROR_EXIT("could not parse -C color %s", buf);                            arg = end - 1; }
+            else            { if (parse_color2(buf, colorC, color) != 2) ERROR_EXIT("could not parse -C color1 color2 %s", buf); *color_set = true; arg = end - 1; }
+            opts->contrast = true;
+        }
         else if (argv[arg][1] == 'd' && argc > arg + 1) {
             char buf[STR_BUFSIZE] = "";
             for (++arg; arg < argc && argv[arg][0] != '-'; ++arg) if (!strncat_safe(buf, sizeof(buf), argv[arg], strlen(buf) > 0)) ERROR_EXIT("input too large");

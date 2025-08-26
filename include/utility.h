@@ -5,6 +5,14 @@
 #include <stdio.h>
 #include "types.h"
 
+// linearize
+double srgb_to_linear(double c);
+
+// gamma-encode
+double linear_to_srgb(double c);
+
+// compute WCAG relative luminance
+double relative_luminance_rgb(const rgb_t *rgb);
 
 // squared euclidian distance between two rgb colors
 double dist2_rgb(const rgb_t *a, const rgb_t *b);

@@ -1,4 +1,4 @@
-// name tables for colors
+// lookup tables used throughout the program
 #ifndef TABLES_H
 #define TABLES_H
 
@@ -45,7 +45,7 @@ const named_t css_colors[] = {
     { "tomato"              , 0xff6347, 0.0 }, { "turquoise"           , 0x40e0d0, 0.0 }, { "violet"              , 0xee82ee, 0.0 }, { "wheat"               , 0xf5deb3, 0.0 }, 
     { "white"               , 0xffffff, 0.0 }, { "whitesmoke"          , 0xf5f5f5, 0.0 }, { "yellow"              , 0xffff00, 0.0 }, { "yellowgreen"         , 0x9acd32, 0.0 }
 };
-const size_t css_colors_size = sizeof(css_colors) / sizeof(css_colors[0]);
+const size_t css_colors_size = ARRAY_LENGTH(css_colors);
 
 // "The 954 most common RGB monitor colors, as defined by several hundred thousand participants in the xkcd color name survey."
 // source: https://xkcd.com/color/rgb/
@@ -289,7 +289,6 @@ const named_t xkcd_colors[] = {
     { "cream"                       , 0xffffc2, 0.0 }, { "ivory"                       , 0xffffcb, 0.0 }, { "eggshell"                    , 0xffffd4, 0.0 }, { "offwhite"                    , 0xffffe4, 0.0 }, 
     { "white"                       , 0xffffff, 0.0 }, 
 };
-
-const size_t xkcd_colors_size = sizeof(xkcd_colors) / sizeof(xkcd_colors[0]);
+const size_t xkcd_colors_size = ARRAY_LENGTH(xkcd_colors);
 
 #endif

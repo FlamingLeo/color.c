@@ -26,7 +26,9 @@ void print_color_line_empty(print_ctx_t *ctx);
 // either option also supports json mode where the output is formatted directly as json
 //
 // returns true if it handled a conversion-only branch, false for a complete block
-bool print_color(const color_t *colorptr, const prog_opts_t *opts,   bool is_main,      char       *bgbufptr, 
-                 char          *fgbufptr, int                cwidth, int  cheight_orig, const char *reset_default);
+bool print_color(const color_t *colorptr, const prog_opts_t *opts,
+                 const char *json_label, bool json_add_comma,
+                 char *bgbufptr, char *fgbufptr,
+                 int cwidth, int cheight_orig, const char *reset_default);
 
 #endif
