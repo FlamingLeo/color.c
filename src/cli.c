@@ -7,8 +7,6 @@
 #include "parser.h"
 #include "printer.h"
 
-#define ERROR_EXIT(_fmt, ...) do { fprintf(stderr, "error: " _fmt "\n\n", ##__VA_ARGS__); print_usage(stderr, progname); return 1; } while(0)
-
 color_cap_t detect_terminal_color() {
     // not a tty (e.g. file output): no color
     if (!isatty(STDOUT_FILENO)) return TC_NONE;
@@ -34,7 +32,7 @@ color_cap_t detect_terminal_color() {
     return TC_NONE;
 }
 
-int parse_cli_args(int argc, char **argv, const char *progname_param, prog_opts_t *opts, color_t *color, color_t *colorD, bool *color_set) {
+void parse_cli_args(int argc, char **argv, const char *progname_param, prog_opts_t *opts, color_t *color, color_t *colorD, bool *color_set) {
     const char *progname = progname_param;
 
     // initialize defaults
@@ -107,6 +105,4 @@ int parse_cli_args(int argc, char **argv, const char *progname_param, prog_opts_
          && !strcasecmp_own(opts->conversion, "cmyk") && !strcasecmp_own(opts->conversion, "hsl")
          && !strcasecmp_own(opts->conversion, "hsv")  && !strcasecmp_own(opts->conversion, "named")) ERROR_EXIT("unknown conversion type %s", opts->conversion);
     }
-
-    return 0;
 }

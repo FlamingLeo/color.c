@@ -4,11 +4,12 @@
 
 #include <stdbool.h>
 
-#define ZERO_THRESH 1e-12
-#define MIN(a,b) ((a) < (b) ? (a) : (b))
-#define MAX(a,b) ((a) > (b) ? (a) : (b))
-#define CLAMP(_n, _l, _r) ((_n) < (_l) ? (_l) : ((_n) > (_r) ? (_r) : (_n)))
+#define MIN(a,b)              ((a) < (b) ? (a) : (b))
+#define MAX(a,b)              ((a) > (b) ? (a) : (b))
+#define CLAMP(_n, _l, _r)     ((_n) < (_l) ? (_l) : ((_n) > (_r) ? (_r) : (_n)))
+#define ERROR_EXIT(_fmt, ...) do { fprintf(stderr, "error: " _fmt "\n\n", ##__VA_ARGS__); print_usage(stderr, progname); exit(EXIT_FAILURE); } while(0)
 
+#define ZERO_THRESH 1e-12
 #define STR_BUFSIZE   128
 #define C_STR_BUFSIZE 20
 #define C_COL_BUFSIZE 64

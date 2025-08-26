@@ -10,21 +10,17 @@
 #include "printer.h"
 #include "utility.h"
 
-// yes i know about backslashes
-#define ERROR_EXIT(_fmt, ...) do { fprintf(stderr, "error: " _fmt "\n\n", ##__VA_ARGS__); print_usage(stderr, progname); return 1; } while(0)
-
 // usage: <progname> [options] color
 int main(int argc, char **argv) {
     const char* progname = argv[0];
     if (argc < 2) ERROR_EXIT("at least one argument must be passed (-h or color)");
 
-    // parse command line options
+    // parse command line options and exit on failure
     prog_opts_t opts;
     color_t color, colorD;
     bool color_set = false;
 
-    int rc = parse_cli_args(argc, argv, progname, &opts, &color, &colorD, &color_set);
-    if (rc != 0) return rc;
+    parse_cli_args(argc, argv, progname, &opts, &color, &colorD, &color_set);
 
     // require a main color unless it was already provided
     if (!color_set) ERROR_EXIT("invalid syntax, color must be specified");

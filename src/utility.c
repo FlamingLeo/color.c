@@ -8,8 +8,6 @@
 #include "utility.h"
 #include "printer.h"
 
-#define ERROR_EXIT(msg, ...) do { fprintf(stderr, "error: " msg "\n\n", ##__VA_ARGS__); print_usage(stderr, progname); exit(EXIT_FAILURE); } while(0)
-
 double dist2_rgb(const rgb_t *a, const rgb_t *b) {
     double dr = (double)a->r - (double)b->r;
     double dg = (double)a->g - (double)b->g;
