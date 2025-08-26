@@ -1,0 +1,2 @@
+known issues:
+- passing the -x parameter after -d <color> causes the first color to use the css named list while the second uses the xkcd named list

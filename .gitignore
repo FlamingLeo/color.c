@@ -8,3 +8,4 @@ scripts/
 *.txt
 *.log
 *.json
+!issues.txt
