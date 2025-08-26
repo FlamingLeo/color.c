@@ -7,12 +7,25 @@
 
 [^1]: For non-truecolor terminals, colorless and 16-/256-color mappings are available. This program also respects the [`NO_COLOR`](https://no-color.org/) environment variable.
 
+## Features
+- **Default**: Show a preview of the chosen color and conversions to different color models.
+    - example: `color lime green`
+- **Difference**: Show previews and the color difference between two colors.
+    - example: `color -d 0xABC 0x123`
+- **Conversion**: Convert a color to a specific color model.
+    - example: `color -c cmyk rgb(17,243,98)`
+- **JSON**: Get the results of any operation as ready-to-parse JSON output.
+    - example: `color -j -d red -c hex 255,0,192`
+- **List**: Get a list of all supported named colors and their hex codes.
+    - example: `color -l`
+
 ## Usage and Formats
-**Usage**: `color [-c <model>] [-f <n>] [-h] [-j] [-l [0|1]] [-m <map>] [-p] [-w <n>] [-W] [-x] <color> <color>`
+**Usage**: `color [-c <model>] [-d <color>] [-f <n>] [-h] [-j] [-l [0|1]] [-m <map>] [-p] [-w <n>] [-W] [-x] <color> <color>`
 
 Following options are supported:
 ```text
 -c <model>: only show the conversion of the chosen color to the specified model, then exit
+-d <color>: choose a color to compute the difference with
 -f <0..5> : choose the maximum amount of decimal places to print (default: 2)
 -h        : show this help text and exit
 -j        : print output in json format

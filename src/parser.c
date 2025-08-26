@@ -1,9 +1,9 @@
-#include <stdio.h>
-#include <string.h>
 #include <ctype.h>
-#include <stdlib.h>
-#include <stdbool.h>
 #include <math.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
 #include "converter.h"
 #include "parser.h"
 #include "tables.h"
@@ -26,6 +26,12 @@ static inline void norm(char *s) {
         if (!isspace(uc)) *dst++ = (char)tolower(uc);
     }
     *dst = '\0';
+}
+
+// helper function to determine if all digits in a string are hex digits
+static inline bool all_hexdigits(const char *ptr, size_t len) {
+    for (size_t i = 0; i < len; ++i) if (!isxdigit((unsigned char)ptr[i])) return false;
+    return true;
 }
 
 // internal parsers: return 1 on success and set the out parameters out->{r,g,b}
@@ -294,17 +300,12 @@ static parse_fn parsers[] = {parse_named, parse_hex, parse_rgb, parse_cmyk, pars
 
 // public api
 named_t closest_named_weighted_rgb(const rgb_t *in) {
-    // source: https://www.compuphase.com/cmetric.htm
-    const double wr = 0.22216091748149788;
-    const double wg = 0.4288860259783791;
-    const double wb = 0.34895305654012304;
-
     double best_score = 1e300;
     size_t best_idx   = 0;
 
     for (size_t i = 0; i < names_size; ++i) {
         rgb_t named = hex_to_rgb(names[i].hex);
-        double d = weighted_dist2_rgb(in, &named, wr, wg, wb);
+        double d = weighted_dist2_rgb(in, &named, W_R, W_G, W_B);
         if (d < best_score) {
             best_score = d;
             best_idx = i;
@@ -344,11 +345,107 @@ int parse_color(const char *in, color_t *out) {
     return 0;
 }
 
+int parse_color2(const char *in, color_t *out0, color_t *out1) {
+    if (!in || !out0 || !out1) return 0;
+
+    const char *p      = in; // current place in input string
+    int         parsed = 0;  // counts how many colors were successfully parsed
+
+    // run logic for both colors
+    for (int cidx = 0; cidx < 2; ++cidx) {
+        while (*p && isspace((unsigned char)*p)) p++;
+        if    (!*p) break;
+
+        const char *lsp               = NULL;  // last success pointer
+        color_t best_tmp              = { 0 }; // best / longest candidate found so far
+        char buf[STR_BUFSIZE]; buf[0] = '\0';  // candidate strings will be built here
+
+        const char *inner   = p;
+        int         tc      = 0; // number of whitespace-separated words appended into buf
+
+        // extend candidate word by word
+        // word = run of non-space characters
+        while (*inner) {
+            while (*inner && isspace((unsigned char)*inner)) inner++;
+            if (!*inner) break;
+
+            const char *q = inner;
+            while (*q && !isspace((unsigned char)*q)) q++;
+            size_t wordlen = (size_t)(q - inner);
+            if (wordlen == 0) break;
+
+            // ensure room in buf or break to prevent buffer overflow
+            size_t len = strlen(buf);
+            if (len + (len ? 1 : 0) + wordlen >= sizeof(buf)) break;
+
+            // append word with single space separator if buf non-empty
+            if (len) { buf[len] = ' '; buf[len + 1] = '\0'; len++; }
+            memcpy(buf + len, inner, wordlen); buf[len + wordlen] = '\0';
+            tc++;
+
+            // try to parse the current candidate
+            color_t tmp;
+            if (parse_color(buf, &tmp)) {
+                // if this candidate was formed by concatenating >=2 tokens, check whether every individual token also parses
+                // if yes, prefer the earlier success, otherwise accept the merged candidate
+                bool all = false;
+                if (tc < 2) {
+                    // accept single-token candidate
+                    lsp      = q;
+                    best_tmp = tmp;
+                } else {
+                    // scan tokens from p up to q and test each one individually
+                    const char *t      = p;
+                    bool        tok_ok = true;
+                    char        tokenbuf[STR_BUFSIZE];
+
+                    while (t < q) {
+                        while (t < q && isspace((unsigned char)*t)) t++;
+                        if (t >= q) break;
+
+                        // same logic as before
+                        const char *tend = t;
+                        while (tend < q && !isspace((unsigned char)*tend)) tend++;
+                        size_t tlen = (size_t)(tend - t);
+                        if (tlen == 0 || tlen >= sizeof(tokenbuf)) { tok_ok = false; break; }
+                        memcpy(tokenbuf, t, tlen); tokenbuf[tlen] = '\0';
+
+                        color_t single_tmp;
+                        if (!parse_color(tokenbuf, &single_tmp)) { tok_ok = false; break; }
+
+                        t = tend; // advance to next token
+                    } // end scanning tokens
+
+                    // if not all tokens parsed individually, merged candidate is legitimate, because some token alone would not parse
+                    // otherwise, reject candidate since every token parses individually and prefer earlier success we recorded
+                    all = tok_ok;
+                    if (!all) { lsp = q; best_tmp = tmp; }
+                }
+            }
+            inner = q; // advance to next word
+        } // end extending candidate
+
+        // no parsed color found starting at p
+        if (!lsp) break;
+
+        // commit parsed color into appropriate out parameter
+        if (cidx == 0) *out0 = best_tmp;
+        else           *out1 = best_tmp;
+        parsed++;
+
+        // advance p to after the consumed words for the committed color
+        p = lsp;
+    } // end for both colors
+
+    return parsed;
+}
+
+
 void list_colors(int l, color_cap_t mode) {
     if (!l && mode == TC_TRUECOLOR)
         for (size_t i = 0; i < names_size; ++i) {
             rgb_t rgb = hex_to_rgb(names[i].hex);
-            printf("\033[48;2;%d;%d;%dm    \x1b[0m%-21s#%06x\n", rgb.r, rgb.g, rgb.b, names[i].name, names[i].hex);
+            printf("\033[48;2;%d;%d;%dm    \x1b[0m %-21s#%06x\n", rgb.r, rgb.g, rgb.b, names[i].name, names[i].hex);
         }
     else {
         printf("name,color\n");

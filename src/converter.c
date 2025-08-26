@@ -1,6 +1,7 @@
 #include <assert.h> // debug checks only, shouldn't (tm) be needed in prod.
 #include <math.h>
 #include <stddef.h>
+
 #include "converter.h"
 #include "parser.h"
 #include "utility.h"
