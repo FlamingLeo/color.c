@@ -1,7 +1,7 @@
 # color.c - A Color Printing and Conversion Tool
 [![Tests](https://github.com/FlamingLeo/color.c/actions/workflows/run-tests.yml/badge.svg)](https://github.com/FlamingLeo/color.c/actions/workflows/run-tests.yml)
 
-![example run](img/example.png)
+![example run](img/example.gif)
 
 `color.c` is a command-line tool designed for terminals with 24-bit color support[^1] which automatically parses the input color, displays it and shows a list of conversions to other common color models.
 
