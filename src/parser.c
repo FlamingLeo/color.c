@@ -41,20 +41,19 @@ static inline bool all_hexdigits(const char *ptr, size_t len) {
 
 // NAMED: any valid named color (either css or xkcd)
 //
-// css is parsed first, then xkcd
-// if both contain a named struct with the same name, the css variant is chosen first
-//
 // note: the "named" struct of the out parameter will still be the best approximation based on the current choice of colors
 //       so, if we use css colors but input an xkcd color, we will still get the closest approximation to a named css color
 static inline int parse_named(char *s, color_t *out) {
     if (!s || !*s) return 0;
 
-    size_t i;
+    const named_t *other_names       = (names == css_colors) ? xkcd_colors      : css_colors;
+    size_t         other_names_size  = (names == css_colors) ? xkcd_colors_size : css_colors_size;
+    size_t         i;
 
-    // iterate through css colors...
-    for (i = 0; i < css_colors_size; ++i) {
-        if (strcmp(s, css_colors[i].name) == 0) {
-            hex_t v    = css_colors[i].hex;
+    // iterate through chosen color list first...
+    for(i = 0; i < names_size; ++i) {
+        if (strcmp(s, names[i].name) == 0) {
+            hex_t v    = names[i].hex;
             out->hex   = v;
             out->rgb   = hex_to_rgb(v);
             out->cmyk  = rgb_to_cmyk(&out->rgb);
@@ -64,13 +63,13 @@ static inline int parse_named(char *s, color_t *out) {
             out->oklab = oklch_to_oklab(&out->oklch);
             out->named = closest_named_weighted_rgb(&out->rgb);
             return 1;
-        }
+        } 
     }
 
-    // ... then xkcd, if we haven't found anything...
-    for (i = 0; i < xkcd_colors_size; ++i) {
-        if (strcmp(s, xkcd_colors[i].name) == 0) {
-            hex_t v    = xkcd_colors[i].hex;
+    // ...then check the next one...
+    for (i = 0; i < other_names_size; ++i) {
+        if (strcmp(s, other_names[i].name) == 0) {
+            hex_t v    = other_names[i].hex;
             out->hex   = v;
             out->rgb   = hex_to_rgb(v);
             out->cmyk  = rgb_to_cmyk(&out->rgb);
