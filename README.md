@@ -48,7 +48,7 @@ Following options are supported:
 > Options are parsed from left to right, and additional options after ones which alter regular program flow (e.g. `-l`) won't be processed. For example, `-W -c rgb -j -l` will list colors in CSS RGB format as JSON, but `-l -W -c rgb -j` will only perform default, non-JSON hexadecimal listing.
 
 > [!TIP]
-> Use `-w 0` to disable the color block or `-d 0` to round to the nearest integer.
+> Use `-w 0` to disable the color block or `-f 0` to round to the nearest integer.
 
 Following color models and input formats are supported (case-insensitive, whitespace allowed):
 - **Named**: Any valid named [CSS](https://github.com/bahamas10/css-color-names/blob/master/css-color-names.json) / [XKCD](https://xkcd.com/color/rgb/) color will work.
